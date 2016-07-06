@@ -1,2 +1,5 @@
 # Ignore WebStorm
 .idea
+
+# External dependencies
+node_modules

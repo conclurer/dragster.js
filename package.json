@@ -1,0 +1,22 @@
+{
+  "name": "dragster.js",
+  "version": "1.0.0",
+  "description": "Drag and drop framework based on Dragula, rewritten in Typescript",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conclurer/dragster.js.git"
+  },
+  "author": "Conclurer GmbH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/conclurer/dragster.js/issues"
+  },
+  "homepage": "https://github.com/conclurer/dragster.js#readme",
+  "devDependencies": {
+    "typescript": "^1.8.10"
+  }
+}
