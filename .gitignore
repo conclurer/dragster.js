@@ -3,3 +3,8 @@
 
 # External dependencies
 node_modules
+
+# Generated files
+**/*.js
+**/*.js.map
+**/*.d.ts
