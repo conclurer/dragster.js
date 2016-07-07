@@ -1,33 +1,19 @@
+import {Dragon} from "./dragon";
+import {IDragsterOptions} from "./interfaces/dragster-options";
+import {DragsterDefaultOptions} from "./dragster-default-options";
+
 export class Dragster {
-
     // Instance variables
-    // Mirrored HTML Element
-    protected mirror: HTMLElement;
+    // Dragon
+    protected dragon: Dragon;
 
-    // Source Container
-    protected source: HTMLElement;
+    // Options
+    protected options: IDragsterOptions;
 
-    // Item being dragged
-    protected item: HTMLElement;
+    // Watched containers
+    protected containers: HTMLElement[] = [];
 
-    // Offset coordinates
-    protected offsetX: any; // #todo
-    protected offsetY: any; // #todo
-
-    // Move coordinates
-    protected moveX: any; // #todo
-    protected moveY: any; // #todo
-
-    protected initialSibling: any; // #todo
-    protected currentSibling: any; // #todo
-
-    // Item used for copying
-    protected copy: HTMLElement;
-
-    protected renderTimer: any; // #todo
-
-    // Last element, this.item was over
-    protected lastDropTarget: HTMLElement;
-
-    protected grabbed: any; // #todo
+    public constructor(options?: IDragsterOptions, ...containers: HTMLElement[]) {
+        this.options = <IDragsterOptions>(options || DragsterDefaultOptions);
+    }
 }
