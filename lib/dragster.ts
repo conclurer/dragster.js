@@ -1,9 +1,11 @@
 import {Dragon} from "./dragon";
-import {IDragsterOptions} from "./interfaces/dragster-options";
+import {IDragsterOptions, DrakeCloneConfigurator} from "./interfaces/dragster-options";
 import {DragsterDefaultOptions} from "./dragster-default-options";
 import {IDrake} from "./interfaces/drake";
-import {IDragsterStartContext} from "./interfaces/dragster-results";
+import {IDragsterStartContext, IDragsterEvent} from "./interfaces/dragster-results";
 import {getParentElement, getNextSibling} from "./helpers/node-functions";
+import {Subject} from "rxjs/Subject";
+import "rxjs/add/operator/filter";
 
 export class Dragster implements IDrake {
     // Instance variables
@@ -18,6 +20,9 @@ export class Dragster implements IDrake {
 
     // Dragging State
     public dragging: boolean = false;
+
+    // Event Emitter
+    protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
 
     public constructor(options?: IDragsterOptions, ...containers: HTMLElement[]) {
         this.options = DragsterDefaultOptions;
@@ -42,7 +47,30 @@ export class Dragster implements IDrake {
      * @param item
      */
     public start(item: HTMLElement): void {
+        let context = this.startContext(item);
+        if (context == null) return;
 
+        // Check if copying the source element is required
+        if (this.requiresCopy(context.item, context.source)) {
+            this.dragon.copy = <HTMLElement>context.item.cloneNode(true);
+            this.emitter.next({
+                channel: 'cloned',
+                data: <any[]>[this.dragon.copy, context.item, 'copy'] // todo custom typing for type check
+            });
+        }
+
+        // Configure environment
+        this.dragon.source = context.source;
+        this.dragon.item = context.item;
+        this.dragon.currentSibling = getNextSibling(context.item);
+        this.dragon.initialSibling = this.dragon.currentSibling;
+        this.dragging = true;
+
+        // Emit drag event
+        this.emitter.next({
+            channel: 'drag',
+            data: <any[]>[context.item, context.source] // todo custom typing for type check
+        });
     }
 
     // todo
@@ -57,8 +85,15 @@ export class Dragster implements IDrake {
     public remove(): void {
     }
 
-    // todo
-    public on(events: string, callback: Function): void {
+    /**
+     * Subscribes callback to any events for the requested channel
+     * @param event
+     * @param callback
+     */
+    public on(event: string, callback: Function): void {
+        this.emitter
+            .filter((dragsterEvent: IDragsterEvent) => dragsterEvent.channel == event)
+            .subscribe((dragsterEvent: IDragsterEvent) => callback(dragsterEvent.data));
     }
 
     // todo
@@ -111,5 +146,20 @@ export class Dragster implements IDrake {
      */
     public isContainer(item: HTMLElement): boolean {
         return this.containers.indexOf(item) !== -1 || this.options.isContainer(item);
+    }
+
+    /**
+     * Returns true if a copy is required for the given triggeringElement inside sourceContainer
+     * @param triggeringItem
+     * @param sourceContainer
+     * @returns {boolean}
+     */
+    public requiresCopy(triggeringItem: HTMLElement, sourceContainer: HTMLElement): boolean {
+        if (typeof this.options.copy === 'boolean') {
+            return <boolean>this.options.copy;
+        }
+        else {
+            return (<DrakeCloneConfigurator>this.options.copy)(triggeringItem, sourceContainer);
+        }
     }
 }

@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/conclurer/dragster.js#readme",
   "devDependencies": {
+    "rxjs": "^5.0.0-beta.6",
     "typescript": "^1.8.10"
+  },
+  "peerDependencies": {
+    "rxjs": "^5.0.0-beta.6"
   }
 }
