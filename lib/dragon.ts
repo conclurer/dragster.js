@@ -6,34 +6,34 @@ export class Dragon {
 
     // Instance variables
     // Mirrored HTML Element
-    protected mirror: HTMLElement;
+    public mirror: HTMLElement;
 
     // Source Container
-    protected source: HTMLElement;
+    public source: HTMLElement;
 
     // Item being dragged
-    protected item: HTMLElement;
+    public item: HTMLElement;
 
     // Offset coordinates
-    protected offsetX: any; // #todo
-    protected offsetY: any; // #todo
+    public offsetX: any; // #todo
+    public offsetY: any; // #todo
 
     // Move coordinates
-    protected moveX: any; // #todo
-    protected moveY: any; // #todo
+    public moveX: any; // #todo
+    public moveY: any; // #todo
 
-    protected initialSibling: any; // #todo
-    protected currentSibling: any; // #todo
+    public initialSibling: any; // #todo
+    public currentSibling: any; // #todo
 
     // Item used for copying
-    protected copy: HTMLElement;
+    public copy: HTMLElement;
 
-    protected renderTimer: any; // #todo
+    public renderTimer: any; // #todo
 
     // Last element, this.item was over
-    protected lastDropTarget: HTMLElement;
+    public lastDropTarget: HTMLElement;
 
-    protected grabbed: any; // #todo
+    public grabbed: any; // #todo
 
 
 }

@@ -10,7 +10,6 @@ export interface IDrake {
     start(item: Element): void;
     end(): void;
     cancel(revert?: boolean): void;
-    cancel(): void;
     remove(): void;
     on(events: string, callback: Function): void;
     destroy(): void;
