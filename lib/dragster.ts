@@ -14,6 +14,6 @@ export class Dragster {
     protected containers: HTMLElement[] = [];
 
     public constructor(options?: IDragsterOptions, ...containers: HTMLElement[]) {
-        this.options = <IDragsterOptions>(options || DragsterDefaultOptions);
+        this.options = (options || new DragsterDefaultOptions());
     }
 }
