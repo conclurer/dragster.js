@@ -55,7 +55,8 @@ export class Dragster implements IDrake {
             this.dragon.copy = <HTMLElement>context.item.cloneNode(true);
             this.emitter.next({
                 channel: 'cloned',
-                data: <any[]>[this.dragon.copy, context.item, 'copy'] // todo custom typing for type check
+                /** {@link DragsterClonedEventHandler} */
+                data: [this.dragon.copy, context.item, 'copy']
             });
         }
 
@@ -69,7 +70,8 @@ export class Dragster implements IDrake {
         // Emit drag event
         this.emitter.next({
             channel: 'drag',
-            data: <any[]>[context.item, context.source] // todo custom typing for type check
+            /** {@link DragsterDragEventHandler} */
+            data: [context.item, context.source]
         });
     }
 
@@ -93,7 +95,7 @@ export class Dragster implements IDrake {
     public on(event: string, callback: Function): void {
         this.emitter
             .filter((dragsterEvent: IDragsterEvent) => dragsterEvent.channel == event)
-            .subscribe((dragsterEvent: IDragsterEvent) => callback(dragsterEvent.data));
+            .subscribe((dragsterEvent: IDragsterEvent) => callback(...dragsterEvent.data));
     }
 
     // todo
