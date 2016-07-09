@@ -1,4 +1,3 @@
-import {Dragon} from "./dragon";
 import {IDragsterOptions, DrakeCloneConfigurator} from "./interfaces/dragster-options";
 import {DragsterDefaultOptions} from "./dragster-default-options";
 import {IDrake} from "./interfaces/drake";
@@ -6,11 +5,12 @@ import {IDragsterStartContext, IDragsterEvent} from "./interfaces/dragster-resul
 import {getParentElement, getNextSibling} from "./helpers/node-functions";
 import {Subject} from "rxjs/Subject";
 import "rxjs/add/operator/filter";
+import {DragonElement} from "./dragon-element";
 
 export class Dragster implements IDrake {
     // Instance variables
-    // Dragon
-    protected dragon: Dragon;
+    // Currently dragged element
+    protected draggedElement: DragonElement = null;
 
     // Options
     protected options: IDragsterOptions;
@@ -32,9 +32,6 @@ export class Dragster implements IDrake {
 
         // Apply containers
         this.containers = containers;
-
-        // Apply dragon
-        this.dragon = new Dragon();
     }
 
     // IDrake Fulfilment
@@ -47,12 +44,12 @@ export class Dragster implements IDrake {
         let context = this.startContext(item);
         if (context == null) return;
 
-        // Check if copying the source element is required
+        /* Check if copying the source element is required
         if (this.requiresCopy(context.item, context.source)) {
             this.dragon.copy = <HTMLElement>context.item.cloneNode(true);
             this.emitter.next({
                 channel: 'cloned',
-                /** {@link DragsterClonedEventHandler} */
+                /** {@link DragsterClonedEventHandler} *
                 data: [this.dragon.copy, context.item, 'copy']
             });
         }
@@ -67,9 +64,9 @@ export class Dragster implements IDrake {
         // Emit drag event
         this.emitter.next({
             channel: 'drag',
-            /** {@link DragsterDragEventHandler} */
+            /** {@link DragsterDragEventHandler} *
             data: [context.item, context.source]
-        });
+        }); */
     }
 
     /**
@@ -78,7 +75,7 @@ export class Dragster implements IDrake {
     public end(): void {
         if (!this.dragging) return;
 
-        this.drop(this.dragon.draggedItem);
+        // todo this.drop(this.dragon.draggedItem);
     }
 
     // todo
@@ -110,7 +107,7 @@ export class Dragster implements IDrake {
         /** Remove original element if targetContainer is sourceContainer
          *  and copySortSource is enabled {@link IDragsterOptions#copySortSource}
          *  For the user, the original element has be re-arranged.
-         */
+         *
         if (this.dragon.hasCopy() && this.options.copySortSource && target === this.dragon.source) {
             target.removeChild(this.dragon.item);
         }
@@ -119,21 +116,21 @@ export class Dragster implements IDrake {
             // Position of item was not changed ~> cancel
             this.emitter.next({
                 channel: 'cancel',
-                /** {@link DragsterCancelEventHandler} */
+                /** {@link DragsterCancelEventHandler} *
                 data: [item, target, target]
             });
         }
         else {
             this.emitter.next({
                 channel: 'drop',
-                /** {@link DragsterDropEventHandler} */
+                /** {@link DragsterDropEventHandler} *
                 data: [item, target, this.dragon.source, this.dragon.currentSibling]
             })
         }
 
         // Cleanup temporary elements
         this.dragon.clean();
-        // todo hook method for dropped item
+        // todo hook method for dropped item */
     }
 
     /**
@@ -145,12 +142,14 @@ export class Dragster implements IDrake {
     protected isInInitialPlacement(container: HTMLElement, sibling?: HTMLElement): boolean {
         let sib: HTMLElement;
 
-        // Determine element to detect positioning
+        /* Determine element to detect positioning
         if (sibling) sib = sibling;
         else if (this.dragon.hasMirror()) sib = this.dragon.currentSibling;
         else sib = getNextSibling(this.dragon.draggedItem);
 
-        return container === this.dragon.source && sib === this.dragon.initialSibling;
+        return container === this.dragon.source && sib === this.dragon.initialSibling; */
+
+        return false;
     }
 
     /**
@@ -161,7 +160,7 @@ export class Dragster implements IDrake {
      */
     protected startContext(item: HTMLElement): IDragsterStartContext {
         // Cancel if there is something currently being dragged
-        if (this.dragging && this.dragon.mirror != null) return null;
+        if (this.dragging) return null;
 
         // Cancel if the requested element is a container itself
         if (this.isContainer(item)) return null;
@@ -221,6 +220,7 @@ export class Dragster implements IDrake {
      * @returns {boolean}
      */
     public get dragging(): boolean {
-        return this.dragon.dragging;
+        if (this.draggedElement == null) return false;
+        return this.draggedElement.isDragging();
     }
 }

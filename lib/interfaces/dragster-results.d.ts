@@ -8,6 +8,20 @@ export interface IDragsterEvent {
     data: any[];
 }
 
+export interface MouseEventMapping {
+    mouseup: string;
+    mousedown: string;
+    mousemove: string;
+    [key: string]: string;
+}
+
+export interface IDragonItemCoordinates {
+    x: number,
+    y:number;
+}
+
+export type mouseEventName = 'mouseup' | 'mousedown' | 'mousemove';
+
 // Clone Event
 export type DragsterCloneType = 'copy' | 'mirror';
 export type DragsterClonedEventHandler = (clonedElement?: HTMLElement,
