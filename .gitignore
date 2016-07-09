@@ -9,3 +9,10 @@ node_modules
 **/*.js.map
 **/*.d.ts
 !lib/interfaces/*.d.ts
+
+# Dist
+dist
+
+# Example
+!demo/*
+demo/example.js
