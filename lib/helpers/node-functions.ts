@@ -69,6 +69,15 @@ export function getImmediateChild(container: HTMLElement, childOfContainer: HTML
     return immediate;
 }
 
+/**
+ * Returns the element in dropTarget that is currently located at position x|y
+ * @param dropTarget
+ * @param target
+ * @param x
+ * @param y
+ * @param direction
+ * @returns {HTMLElement}
+ */
 export function getElementForPosition(dropTarget: HTMLElement, target: HTMLElement, x: number, y: number, direction: string): HTMLElement {
     var horizontal = direction === 'horizontal';
 
