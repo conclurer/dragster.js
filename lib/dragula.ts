@@ -5,8 +5,9 @@ import {Dragster} from "./dragster";
  * Initializes a new Dragster instance
  * Interfaces dragula
  * @param optionsOrNodes
+ * @param options
  */
-export function dragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions)): any;
+export function dragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions), options?: IDragsterOptions): any;
 
 /**
  * Initializes a new Dragster instance

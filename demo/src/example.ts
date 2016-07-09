@@ -1,4 +1,3 @@
-'use strict';
 import {dragula} from "../../lib/dragula";
 
 //var crossvent = require('crossvent');

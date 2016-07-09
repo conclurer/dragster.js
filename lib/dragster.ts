@@ -22,7 +22,7 @@ export class Dragster implements IDrake {
     protected originalSibling: HTMLElement = null;
 
     // Options
-    protected options: IDragsterOptions = DragsterDefaultOptions;
+    protected options: IDragsterOptions = new DragsterDefaultOptions();
 
     // Watched containers
     public containers: HTMLElement[] = [];
