@@ -18,9 +18,6 @@ export class Dragster implements IDrake {
     // Watched containers
     public containers: HTMLElement[] = [];
 
-    // Dragging State
-    public dragging: boolean = false;
-
     // Event Emitter
     protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
 
@@ -75,8 +72,13 @@ export class Dragster implements IDrake {
         });
     }
 
-    // todo
+    /**
+     * Stops dragging the currently dragged item
+     */
     public end(): void {
+        if (!this.dragging) return;
+
+        this.drop(this.dragon.draggedItem);
     }
 
     // todo
@@ -100,6 +102,55 @@ export class Dragster implements IDrake {
 
     // todo
     public destroy(): void {
+    }
+
+    protected drop(item: HTMLElement): void {
+        let target = getParentElement(item);
+
+        /** Remove original element if targetContainer is sourceContainer
+         *  and copySortSource is enabled {@link IDragsterOptions#copySortSource}
+         *  For the user, the original element has be re-arranged.
+         */
+        if (this.dragon.hasCopy() && this.options.copySortSource && target === this.dragon.source) {
+            target.removeChild(this.dragon.item);
+        }
+
+        if (this.isInInitialPlacement(target)) {
+            // Position of item was not changed ~> cancel
+            this.emitter.next({
+                channel: 'cancel',
+                /** {@link DragsterCancelEventHandler} */
+                data: [item, target, target]
+            });
+        }
+        else {
+            this.emitter.next({
+                channel: 'drop',
+                /** {@link DragsterDropEventHandler} */
+                data: [item, target, this.dragon.source, this.dragon.currentSibling]
+            })
+        }
+
+        // Cleanup temporary elements
+        this.dragon.clean();
+        // todo hook method for dropped item
+    }
+
+    /**
+     * Returns true if the given container and sibling match the initial container and sibling
+     * @param container
+     * @param sibling
+     * @returns {boolean}
+     */
+    protected isInInitialPlacement(container: HTMLElement, sibling?: HTMLElement): boolean {
+        let sib: HTMLElement;
+
+        // Determine element to detect positioning
+        if (sibling) sib = sibling;
+        else if (this.dragon.hasMirror()) sib = this.dragon.currentSibling;
+        else sib = getNextSibling(this.dragon.draggedItem);
+
+        return container === this.dragon.source && sib === this.dragon.initialSibling;
     }
 
     /**
@@ -163,5 +214,13 @@ export class Dragster implements IDrake {
         else {
             return (<DrakeCloneConfigurator>this.options.copy)(triggeringItem, sourceContainer);
         }
+    }
+
+    /**
+     * Returns true if there is an item currently being dragged
+     * @returns {boolean}
+     */
+    public get dragging(): boolean {
+        return this.dragon.dragging;
     }
 }
