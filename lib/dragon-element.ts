@@ -43,7 +43,7 @@ export class DragonElement {
     // Item Move Stream
     protected itemMoveStream: Subscription;
     protected mouseCoordinatesOnStart: IDragonItemCoordinates;
-    protected lastDropTarget: HTMLElement;
+    protected lastDropTarget: HTMLElement = null;
     protected currentSibling: HTMLElement;
 
     // Event Emitter
@@ -101,6 +101,10 @@ export class DragonElement {
             return Observable.fromEvent(document.documentElement, eventName);
         });
 
+        // latest coordinates of user
+        let clientX: number;
+        let clientY: number;
+
         // Subscribe to user's mouse move events
         this.itemMoveStream = Observable.merge(...moveEvents)
         // Cancel when the user stops to
@@ -124,8 +128,10 @@ export class DragonElement {
                     let elementInnerY = this.itemOriginalCoordinates.y + (this.mouseCoordinatesOnStart.y - this.itemOriginalCoordinates.y);
 
                     // Calculate total x/y position
-                    let x = itemMovedEvent.clientX - elementInnerX;
-                    let y = itemMovedEvent.clientY - elementInnerY;
+                    clientX = itemMovedEvent.clientX;
+                    clientY = itemMovedEvent.clientY;
+                    let x = clientX - elementInnerX;
+                    let y = clientY - elementInnerY;
                     this.flyingItem.style.transform = `translate(${x}px, ${y}px)`;
 
                     this.detectDropZone(itemMovedEvent.clientX, itemMovedEvent.clientY);
@@ -133,11 +139,7 @@ export class DragonElement {
                 (error) => console.log(error),
 
                 // Executed when the user stops to drag one element
-                () => {
-                    // todo: stop dragging + cleanup
-                    this.dragging = false;
-                    this.cancelled = true;
-                }
+                () => this.release(clientX, clientY)
             );
     }
 
@@ -248,6 +250,116 @@ export class DragonElement {
                 data: [this.shadowItem, dropZone]
             });
         }
+    }
+
+    /**
+     * Releases this.item currently being dragged at position mouseX|mouseY
+     * @param mouseX
+     * @param mouseY
+     */
+    protected release(mouseX: number, mouseY: number): void {
+        // Cancel if not dragging
+        if (!this.isDragging()) return;
+
+        // Detect drop zone
+        let overElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
+        let dropZone = this.dropTargetLocator(overElement, mouseX, mouseY);
+
+        // todo: custom condition for copy drops
+        // todo: dropTarget && ((_copy && o.copySortSource) || (!_copy || dropTarget !== _source))
+        if (dropZone != null) {
+            this.drop(this.item, dropZone);
+        }
+        else if (false) {
+            // todo: remove on spill
+        }
+        else {
+            this.cancel();
+        }
+
+        // Set instance variables
+        // Cancel drag events
+        this.dragging = false;
+        this.cancelled = true;
+
+        // Unsubscribe stream
+        if (!this.itemMoveStream.isUnsubscribed) this.itemMoveStream.unsubscribe();
+    }
+
+    /**
+     * Performs a drop operation of item into target
+     * @param item
+     * @param target
+     */
+    protected drop(item: HTMLElement, target: HTMLElement): void {
+        // Cancel if not dragging
+        if (!this.isDragging()) return;
+
+        // todo initial placement dependency
+        /**
+         if (isInitialPlacement(target)) {
+      drake.emit('cancel', item, _source, _source);
+    } else {
+      drake.emit('drop', item, target, _source, _currentSibling);
+    }
+         */
+
+        this.cleanup();
+    }
+
+    /**
+     * Cancels the current drag operation. If configured or revert is set, this.item will be reverted to its original position.
+     * @param revert
+     */
+    public cancel(revert: boolean = false): void {
+        // Cancel if not dragging
+        if (!this.isDragging()) return;
+
+        let reverts = false; //todo use revert on spill
+        if (revert) reverts = true;
+
+        // todo initial placement dependecy
+        /**
+         var item = _copy || _item;
+         var parent = getParent(item);
+         var initial = isInitialPlacement(parent);
+         if (initial === false && reverts) {
+      if (_copy) {
+        parent.removeChild(_copy);
+      } else {
+        _source.insertBefore(item, _initialSibling);
+      }
+    }
+         if (initial || reverts) {
+      drake.emit('cancel', item, _source, _source);
+    } else {
+      drake.emit('drop', item, parent, _source, _currentSibling);
+    }
+         */
+
+        this.cleanup();
+    }
+
+    /**
+     * Performs a cleanup of this, removing the flying element.
+     */
+    protected cleanup(): void {
+        // Remove flyingItem
+        this.flyingItem.parentNode.removeChild(this.flyingItem);
+
+        // Emit out event for lastDropTarget
+        if (this.lastDropTarget != null) {
+            this.emitter.next({
+                channel: 'out',
+                data: [this.item, this.lastDropTarget]
+            });
+        }
+
+        // Emit dragend event
+        this.emitter.next({
+            channel: 'dragend',
+            data: [this.item]
+        });
     }
 
     /**
