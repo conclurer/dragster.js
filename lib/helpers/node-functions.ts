@@ -4,6 +4,7 @@
  * @returns {HTMLElement}
  */
 export function getParentElement(givenElement: HTMLElement): HTMLElement {
+    if (givenElement == null) return null;
     return givenElement.parentElement === <Node>document ? null : givenElement.parentElement;
 }
 
@@ -13,6 +14,8 @@ export function getParentElement(givenElement: HTMLElement): HTMLElement {
  * @returns {HTMLElement}
  */
 export function getNextSibling(givenElement: HTMLElement): HTMLElement {
+    if (givenElement == null) return null;
+
     let nextElementSibling = <HTMLElement>givenElement.nextElementSibling;
     if (nextElementSibling) return nextElementSibling;
 
@@ -53,6 +56,9 @@ export function getElementBehindPoint(x: number, y: number, flyingElement?: HTML
  * @returns {HTMLElement}
  */
 export function getImmediateChild(container: HTMLElement, childOfContainer: HTMLElement): HTMLElement {
+    // Cancel if childOfContainer is equal to container
+    if (container === childOfContainer) return null;
+
     let immediate = childOfContainer;
     while (immediate !== container && getParentElement(immediate) !== container) {
         immediate = getParentElement(immediate);

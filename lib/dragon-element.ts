@@ -5,8 +5,18 @@ import "rxjs/add/observable/fromEvent";
 import "rxjs/add/observable/merge";
 import "rxjs/add/operator/takeUntil";
 import {Subject} from "rxjs/Subject";
-import {IDragsterEvent, IDragonItemCoordinates, dropTargetLocator} from "./interfaces/dragster-results";
-import {getElementBehindPoint} from "./helpers/node-functions";
+import {
+    IDragsterEvent,
+    IDragonItemCoordinates,
+    dropTargetLocator,
+    shadowElementProvider
+} from "./interfaces/dragster-results";
+import {
+    getElementBehindPoint,
+    getImmediateChild,
+    getElementForPosition,
+    getNextSibling
+} from "./helpers/node-functions";
 
 /**
  * DragonElement
@@ -21,6 +31,9 @@ export class DragonElement {
     // Item dragged instead of original
     protected flyingItem: HTMLElement = null;
 
+    // Item displayed inside a potential drop zone
+    protected shadowItem: HTMLElement = null;
+
     // If true, the drag operation has been cancelled by the user
     protected cancelled: boolean = false;
 
@@ -30,6 +43,8 @@ export class DragonElement {
     // Item Move Stream
     protected itemMoveStream: Subscription;
     protected mouseCoordinatesOnStart: IDragonItemCoordinates;
+    protected lastDropTarget: HTMLElement;
+    protected currentSibling: HTMLElement;
 
     // Event Emitter
     protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
@@ -37,6 +52,7 @@ export class DragonElement {
     // Configuration
     // Drop Target Locator
     public dropTargetLocator: dropTargetLocator = DragonElement.defaultDropTargetLocator;
+    public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
 
     public constructor(item: HTMLElement) {
         this.item = item;
@@ -143,8 +159,72 @@ export class DragonElement {
         let overElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
         let dropZone = this.dropTargetLocator(overElement, mouseX, mouseY);
 
-        // Cancel if no dropZone was found
+        // Determine whether the drop target did change
+        let dropTargetDidChange = (dropZone != null && dropZone !== this.lastDropTarget);
+
+        // Re-assign lastDropZone and trigger events
+        if (dropTargetDidChange || dropZone == null) {
+            // Emit out event
+            if (this.lastDropTarget != null) {
+                this.emitter.next({
+                    channel: 'out',
+                    data: [this.item, this.lastDropTarget]
+                });
+            }
+
+            this.lastDropTarget = dropZone;
+
+            // Emit over event
+            if (this.lastDropTarget != null) {
+                this.emitter.next({
+                    channel: 'over',
+                    data: [this.item, this.lastDropTarget]
+                });
+            }
+        }
+
+        // Cancel if dropZone is null
         if (dropZone == null) return;
+
+        // Find child in Drop Zone
+        let immediate = getImmediateChild(dropZone, overElement);
+        let reference: HTMLElement;
+
+        // Perform checks on immediate
+        if (immediate != null) {
+            // todo: pass direction
+            reference = getElementForPosition(dropZone, immediate, mouseX, mouseY, 'vertical');
+        }
+        // todo: pass revert on spill
+        else if (false) {
+            // todo: revert on spill
+        }
+        // Cancel if no condition applies
+        else return;
+
+        // Check conditions for adding shadow to dropZone
+        if ((reference == null && dropTargetDidChange) || reference !== this.shadowItem && reference !== getNextSibling(this.shadowItem)) {
+            this.currentSibling = reference;
+
+            // Remove existing shadow item if present
+            // Do not remove it if it is the original item
+            if (this.shadowItem != null && this.shadowItem !== this.item) {
+                this.shadowItem.parentNode.removeChild(this.shadowItem);
+                this.shadowItem = null;
+            }
+
+            // Create new shadowItem
+            this.shadowItem = this.shadowElementProvider(this.item, dropZone);
+
+            // Insert shadowItem
+            dropZone.insertBefore(this.shadowItem, reference);
+
+            // Emit shadow event
+            this.emitter.next({
+                channel: 'shadow',
+                data: [this.shadowItem, dropZone]
+            });
+        }
     }
 
     public static defaultFlyingElement(originalElement: HTMLElement): HTMLElement {
@@ -163,6 +243,10 @@ export class DragonElement {
         document.body.classList.add('gu-unselectable');
 
         return mirror;
+    }
+
+    public static defaultShadowElementProvider(itemInMotion: HTMLElement, shadowContainer: HTMLElement): HTMLElement {
+        return itemInMotion;
     }
 
     public static defaultDropTargetLocator(elementFlownOver: HTMLElement, mouseX: number, mouseY: number): HTMLElement {

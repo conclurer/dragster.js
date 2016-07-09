@@ -21,6 +21,7 @@ export interface IDragonItemCoordinates {
 }
 
 export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number)=>HTMLElement;
+export type shadowElementProvider = (elementInMotion: HTMLElement, shadowContainer: HTMLElement)=> HTMLElement;
 
 export type mouseEventName = 'mouseup' | 'mousedown' | 'mousemove';
 

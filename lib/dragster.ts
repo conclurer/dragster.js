@@ -250,8 +250,9 @@ export class Dragster implements IDrake {
                 continue;
             }
 
+            // Detect immediate child element of target, cancel if it does not exist
             let immediate = getImmediateChild(target, elementFlownOver);
-            if (immediate == null) continue;
+            if (immediate == null) return null;
 
             let elementAtPosition = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
 
