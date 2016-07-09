@@ -10,17 +10,19 @@ import {Observable} from "rxjs/Observable";
 import "rxjs/add/observable/fromEvent";
 import "rxjs/add/observable/merge";
 import {getEventNames} from "./helpers/mouse-event-functions";
+import {Subscription} from "rxjs/Subscription";
 
 export class Dragster implements IDrake {
     // Instance variables
     // Currently dragged element
     protected draggedElement: DragonElement = null;
-    protected originalElement: HTMLElement;
-    protected originalContainer: HTMLElement;
-    protected originalSibling: HTMLElement;
+    protected draggedElementEventSubscription: Subscription;
+    protected originalElement: HTMLElement = null;
+    protected originalContainer: HTMLElement = null;
+    protected originalSibling: HTMLElement = null;
 
     // Options
-    protected options: IDragsterOptions;
+    protected options: IDragsterOptions = DragsterDefaultOptions;
 
     // Watched containers
     public containers: HTMLElement[] = [];
@@ -29,8 +31,6 @@ export class Dragster implements IDrake {
     protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
 
     public constructor(options?: IDragsterOptions, ...containers: HTMLElement[]) {
-        this.options = DragsterDefaultOptions;
-
         // Apply given options
         for (let key in options) {
             if (!options.hasOwnProperty(key)) continue;
@@ -55,31 +55,38 @@ export class Dragster implements IDrake {
         if (context == null) return;
 
         /* Check if copying the source element is required
-        if (this.requiresCopy(context.item, context.source)) {
-            this.dragon.copy = <HTMLElement>context.item.cloneNode(true);
-            this.emitter.next({
-                channel: 'cloned',
-                /** {@link DragsterClonedEventHandler} *
-                data: [this.dragon.copy, context.item, 'copy']
-            });
-        }
+         if (this.requiresCopy(context.item, context.source)) {
+         this.dragon.copy = <HTMLElement>context.item.cloneNode(true);
+         this.emitter.next({
+         channel: 'cloned',
+         /** {@link DragsterClonedEventHandler} *
+         data: [this.dragon.copy, context.item, 'copy']
+         });
+         }
 
-        // Configure environment
-        this.dragon.source = context.source;
-        this.dragon.item = context.item;
-        this.dragon.currentSibling = getNextSibling(context.item);
-        this.dragon.initialSibling = this.dragon.currentSibling;
-        this.dragging = true;
+         // Configure environment
+         this.dragon.source = context.source;
+         this.dragon.item = context.item;
+         this.dragon.currentSibling = getNextSibling(context.item);
+         this.dragon.initialSibling = this.dragon.currentSibling;
+         this.dragging = true;
 
-        // Emit drag event
-        this.emitter.next({
-            channel: 'drag',
-            /** {@link DragsterDragEventHandler} *
-            data: [context.item, context.source]
-        }); */
+         // Emit drag event
+         this.emitter.next({
+         channel: 'drag',
+         /** {@link DragsterDragEventHandler} *
+         data: [context.item, context.source]
+         }); */
     }
 
+    /**
+     * Grabs an element targeted by a mouse down event if element can be dragged
+     * @param event
+     */
     protected grab(event: MouseEvent): void {
+        // Cancel if there is an element already being dragged
+        if (this.draggedElement != null) return;
+
         let context = this.startContext(<HTMLElement>event.target);
         if (context == null) return;
 
@@ -91,7 +98,65 @@ export class Dragster implements IDrake {
         // Configure Dragon
         this.draggedElement = new DragonElement(context.item);
         this.draggedElement.dropTargetLocator = (element: HTMLElement, x: number, y: number) => this.findDropTarget(element, x, y);
+        this.draggedElement.dragster = this;
+
+        // Subscribe to Dragon events
+        this.draggedElementEventSubscription = this.draggedElement.events().subscribe((event: IDragsterEvent) => {
+            switch (event.channel) {
+                // Drag Event
+                case 'drag':
+                    /** {@link DragsterDragEventHandler} */
+                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    break;
+
+                case 'cloned':
+                    /** {@link DragsterClonedEventHandler} */
+                    this.emitMessage(event.channel, event.data);
+                    break;
+
+                case 'out':
+                    /** {@link DragsterOutEventHandler} */
+                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    break;
+
+                case 'over':
+                    /** {@link DragsterOverEventHandler} */
+                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    break;
+
+                case 'shadow':
+                    /** {@link DragsterShadowEventHandler} */
+                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    break;
+
+                case 'drop':
+                    // Execute drop event handler
+                    this.drop(event.data[0], event.data[1], event.data[2]);
+                    break;
+
+                case 'cancel':
+                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    break;
+
+                case 'dragend':
+                    /** {@link DragsterDragEndEventHandler} */
+                    this.emitMessage(event.channel, event.data);
+
+                    // Cleanup this
+                    this.cleanup();
+                    break;
+            }
+        });
+
+        // Start drag operation
         this.draggedElement.grab(event);
+    }
+
+    private emitMessage(channel: string, data: any[]): void {
+        this.emitter.next({
+            channel: channel,
+            data: data
+        });
     }
 
     /**
@@ -124,40 +189,46 @@ export class Dragster implements IDrake {
         return this;
     }
 
+    /**
+     * Returns a stream of all events of this Dragster instance
+     * @returns {Observable<IDragsterEvent>}
+     */
+    public events(): Observable<IDragsterEvent> {
+        return this.emitter.asObservable();
+    }
+
     // todo
     public destroy(): void {
     }
 
-    protected drop(item: HTMLElement): void {
-        let target = getParentElement(item);
-
-        /** Remove original element if targetContainer is sourceContainer
-         *  and copySortSource is enabled {@link IDragsterOptions#copySortSource}
-         *  For the user, the original element has be re-arranged.
-         *
-        if (this.dragon.hasCopy() && this.options.copySortSource && target === this.dragon.source) {
-            target.removeChild(this.dragon.item);
-        }
-
-        if (this.isInInitialPlacement(target)) {
+    protected drop(item: HTMLElement, targetContainer: HTMLElement, currentSibling: HTMLElement): void {
+        if (this.isInInitialPlacement(targetContainer, currentSibling)) {
             // Position of item was not changed ~> cancel
             this.emitter.next({
                 channel: 'cancel',
-                /** {@link DragsterCancelEventHandler} *
-                data: [item, target, target]
+                /** {@link DragsterCancelEventHandler} */
+                data: [item, targetContainer, this.originalContainer]
             });
         }
         else {
             this.emitter.next({
                 channel: 'drop',
-                /** {@link DragsterDropEventHandler} *
-                data: [item, target, this.dragon.source, this.dragon.currentSibling]
-            })
+                /** {@link DragsterDropEventHandler} */
+                data: [item, targetContainer, this.originalContainer, currentSibling]
+            });
         }
+    }
 
-        // Cleanup temporary elements
-        this.dragon.clean();
-        // todo hook method for dropped item */
+    protected cleanup(): void {
+        // Unsubscribe and remove draggedElement
+        if (!this.draggedElementEventSubscription.isUnsubscribed) this.draggedElementEventSubscription.unsubscribe();
+        this.draggedElementEventSubscription = null;
+        this.draggedElement = null;
+
+        // Clear instance variables
+        this.originalContainer = null;
+        this.originalElement = null;
+        this.originalSibling = null;
     }
 
     /**
@@ -166,7 +237,7 @@ export class Dragster implements IDrake {
      * @param sibling
      * @returns {boolean}
      */
-    protected isInInitialPlacement(container: HTMLElement, sibling?: HTMLElement): boolean {
+    public isInInitialPlacement(container: HTMLElement, sibling?: HTMLElement): boolean {
         let sib: HTMLElement;
 
         //Determine element to detect positioning
@@ -223,6 +294,14 @@ export class Dragster implements IDrake {
      */
     public isContainer(item: HTMLElement): boolean {
         return this.containers.indexOf(item) !== -1 || this.options.isContainer(item);
+    }
+
+    public currentSourceContainer(): HTMLElement {
+        return this.originalContainer;
+    }
+
+    public currentSourceSibling(): HTMLElement {
+        return this.originalSibling;
     }
 
     /**

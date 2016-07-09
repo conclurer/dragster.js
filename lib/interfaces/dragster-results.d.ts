@@ -17,7 +17,7 @@ export interface MouseEventMapping {
 
 export interface IDragonItemCoordinates {
     x: number,
-    y:number;
+    y: number;
 }
 
 export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number)=>HTMLElement;
@@ -35,6 +35,9 @@ export type DragsterClonedEventHandler = (clonedElement?: HTMLElement,
 export type DragsterDragEventHandler = (draggedElement?: HTMLElement,
                                         sourceContainer?: HTMLElement)=>any;
 
+// Dragend Event
+export type DragsterDragEndEventHandler = (draggedElement?: HTMLElement)=>any;
+
 // Cancel Event
 export type DragsterCancelEventHandler = (draggedElement?: HTMLElement,
                                           currentContainer?: HTMLElement,
@@ -45,3 +48,18 @@ export type DragsterDropEventHandler = (droppedElement?: HTMLElement,
                                         dropTargetContainer?: HTMLElement,
                                         sourceContainer?: HTMLElement,
                                         beforeSibling?: HTMLElement)=>any;
+
+// Out Event
+export type DragsterOutEventHandler = (movedElement?: HTMLElement,
+                                       containerElementWasOver?: HTMLElement,
+                                       sourceContainer?: HTMLElement)=>any;
+
+// Over Event
+export type DragsterOverEventHandler = (movedElement?: HTMLElement,
+                                        containerElementIsOver?: HTMLElement,
+                                        sourceContainer?: HTMLElement)=>any;
+
+// Shadow Event
+export type DragsterShadowEventHandler = (shadowElement?: HTMLElement,
+                                          containerShadowIsIn?: HTMLElement,
+                                          sourceContainer?: HTMLElement)=>any;

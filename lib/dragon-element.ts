@@ -17,6 +17,7 @@ import {
     getElementForPosition,
     getNextSibling
 } from "./helpers/node-functions";
+import {Dragster} from "./dragster";
 
 /**
  * DragonElement
@@ -24,6 +25,9 @@ import {
  */
 export class DragonElement {
     // Instance variables
+    // Parent Dragster Instance
+    public dragster: Dragster = null;
+
     // HTML Element to watch
     protected item: HTMLElement;
     protected itemOriginalCoordinates: IDragonItemCoordinates;
@@ -87,6 +91,14 @@ export class DragonElement {
      */
     public isCancelled(): boolean {
         return this.cancelled;
+    }
+
+    /**
+     * Returns a stream of all events triggered by this.
+     * @returns {Observable<IDragsterEvent>}
+     */
+    public events(): Observable<IDragsterEvent> {
+        return this.emitter.asObservable();
     }
 
     /**
@@ -295,14 +307,11 @@ export class DragonElement {
         // Cancel if not dragging
         if (!this.isDragging()) return;
 
-        // todo initial placement dependency
-        /**
-         if (isInitialPlacement(target)) {
-      drake.emit('cancel', item, _source, _source);
-    } else {
-      drake.emit('drop', item, target, _source, _currentSibling);
-    }
-         */
+        // Emit drop event
+        this.emitter.next({
+            channel: 'drop',
+            data: [item, target, this.currentSibling]
+        });
 
         this.cleanup();
     }
@@ -318,24 +327,25 @@ export class DragonElement {
         let reverts = false; //todo use revert on spill
         if (revert) reverts = true;
 
-        // todo initial placement dependecy
-        /**
-         var item = _copy || _item;
-         var parent = getParent(item);
-         var initial = isInitialPlacement(parent);
-         if (initial === false && reverts) {
-      if (_copy) {
-        parent.removeChild(_copy);
-      } else {
-        _source.insertBefore(item, _initialSibling);
-      }
-    }
-         if (initial || reverts) {
-      drake.emit('cancel', item, _source, _source);
-    } else {
-      drake.emit('drop', item, parent, _source, _currentSibling);
-    }
-         */
+        var isInInitialPosition = this.dragster.isInInitialPlacement(this.lastDropTarget, this.currentSibling);
+        if (!isInInitialPosition && reverts) {
+            this.dragster.currentSourceContainer().insertBefore(this.item, this.dragster.currentSourceSibling());
+        }
+
+        if (isInInitialPosition || reverts) {
+            // Emit cancel event
+            this.emitter.next({
+                channel: 'cancel',
+                data: [this.item, this.lastDropTarget]
+            });
+        }
+        else {
+            // Emit drop event
+            this.emitter.next({
+                channel: 'drop',
+                data: [this.item, this.lastDropTarget, this.currentSibling]
+            });
+        }
 
         this.cleanup();
     }
@@ -360,6 +370,9 @@ export class DragonElement {
             channel: 'dragend',
             data: [this.item]
         });
+
+        // Complete event stream
+        this.emitter.complete();
     }
 
     /**
