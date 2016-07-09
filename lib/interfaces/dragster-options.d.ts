@@ -13,11 +13,11 @@ export interface IDragsterOptions {
     /**
      * If true, triggeringElement from sourceContainer can be moved into targetContainer
      * @param triggeringElement
-     * @param sourceContainer
      * @param targetContainer
+     * @param sourceContainer
      * @param sibling
      */
-    accepts?(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, targetContainer?: HTMLElement, sibling?: HTMLElement): boolean;
+    accepts?(triggeringElement?: HTMLElement, targetContainer?: HTMLElement, sourceContainer?: HTMLElement, sibling?: HTMLElement): boolean;
 
     /**
      * If true, triggeringElement cannot be dragged

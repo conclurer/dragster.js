@@ -1,4 +1,5 @@
 import {IDragsterOptions} from "./interfaces/dragster-options";
+import {Dragster} from "./dragster";
 
 /**
  * Initializes a new Dragster instance
@@ -20,4 +21,6 @@ export function dragula(initialNodes: HTMLElement[], options?: IDragsterOptions)
         options = <any>initialNodes;
         initialNodes = [];
     }
+
+    return new Dragster(options, ...initialNodes);
 }

@@ -11,6 +11,6 @@ export interface IDrake {
     end(): void;
     cancel(revert?: boolean): void;
     remove(): void;
-    on(events: string, callback: Function): void;
+    on(events: string, callback: Function): any;
     destroy(): void;
 }

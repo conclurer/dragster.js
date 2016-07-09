@@ -20,6 +20,8 @@ export interface IDragonItemCoordinates {
     y:number;
 }
 
+export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number)=>HTMLElement;
+
 export type mouseEventName = 'mouseup' | 'mousedown' | 'mousemove';
 
 // Clone Event

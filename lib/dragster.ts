@@ -2,15 +2,22 @@ import {IDragsterOptions, DrakeCloneConfigurator} from "./interfaces/dragster-op
 import {DragsterDefaultOptions} from "./dragster-default-options";
 import {IDrake} from "./interfaces/drake";
 import {IDragsterStartContext, IDragsterEvent} from "./interfaces/dragster-results";
-import {getParentElement, getNextSibling} from "./helpers/node-functions";
+import {getParentElement, getNextSibling, getImmediateChild, getElementForPosition} from "./helpers/node-functions";
 import {Subject} from "rxjs/Subject";
 import "rxjs/add/operator/filter";
 import {DragonElement} from "./dragon-element";
+import {Observable} from "rxjs/Observable";
+import "rxjs/add/observable/fromEvent";
+import "rxjs/add/observable/merge";
+import {getEventNames} from "./helpers/mouse-event-functions";
 
 export class Dragster implements IDrake {
     // Instance variables
     // Currently dragged element
     protected draggedElement: DragonElement = null;
+    protected originalElement: HTMLElement;
+    protected originalContainer: HTMLElement;
+    protected originalSibling: HTMLElement;
 
     // Options
     protected options: IDragsterOptions;
@@ -32,6 +39,9 @@ export class Dragster implements IDrake {
 
         // Apply containers
         this.containers = containers;
+
+        // Setup events
+        this.setupEvents();
     }
 
     // IDrake Fulfilment
@@ -69,6 +79,21 @@ export class Dragster implements IDrake {
         }); */
     }
 
+    protected grab(event: MouseEvent): void {
+        let context = this.startContext(<HTMLElement>event.target);
+        if (context == null) return;
+
+        // Save origin
+        this.originalContainer = context.source;
+        this.originalElement = context.item;
+        this.originalSibling = getNextSibling(context.item);
+
+        // Configure Dragon
+        this.draggedElement = new DragonElement(context.item);
+        this.draggedElement.dropTargetLocator = (element: HTMLElement, x: number, y: number) => this.findDropTarget(element, x, y);
+        this.draggedElement.grab(event);
+    }
+
     /**
      * Stops dragging the currently dragged item
      */
@@ -91,10 +116,12 @@ export class Dragster implements IDrake {
      * @param event
      * @param callback
      */
-    public on(event: string, callback: Function): void {
+    public on(event: string, callback: Function): Dragster {
         this.emitter
             .filter((dragsterEvent: IDragsterEvent) => dragsterEvent.channel == event)
             .subscribe((dragsterEvent: IDragsterEvent) => callback(...dragsterEvent.data));
+
+        return this;
     }
 
     // todo
@@ -142,14 +169,12 @@ export class Dragster implements IDrake {
     protected isInInitialPlacement(container: HTMLElement, sibling?: HTMLElement): boolean {
         let sib: HTMLElement;
 
-        /* Determine element to detect positioning
+        //Determine element to detect positioning
         if (sibling) sib = sibling;
-        else if (this.dragon.hasMirror()) sib = this.dragon.currentSibling;
-        else sib = getNextSibling(this.dragon.draggedItem);
+        // todo else if (this.dragon.hasMirror()) sib = this.dragon.currentSibling;
+        else sib = this.originalSibling;
 
-        return container === this.dragon.source && sib === this.dragon.initialSibling; */
-
-        return false;
+        return container === this.originalContainer && sib === this.originalSibling;
     }
 
     /**
@@ -215,6 +240,32 @@ export class Dragster implements IDrake {
         }
     }
 
+    protected findDropTarget(elementFlownOver: HTMLElement, mouseX: number, mouseY: number): HTMLElement {
+        let target: HTMLElement = elementFlownOver;
+
+        do {
+            // Skip if the given element is not a valid container element
+            if (!this.isContainer(target)) {
+                target = getParentElement(target);
+                continue;
+            }
+
+            let immediate = getImmediateChild(target, elementFlownOver);
+            if (immediate == null) continue;
+
+            let elementAtPosition = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
+
+            // An element should always be allowed to drop back to its origin
+            if (this.isInInitialPlacement(target, elementAtPosition)) break;
+
+            // Use options to detect if able to drop
+            if (this.options.accepts(this.originalElement, target, this.originalContainer, elementAtPosition)) break;
+
+        } while (target != null);
+
+        return target;
+    }
+
     /**
      * Returns true if there is an item currently being dragged
      * @returns {boolean}
@@ -222,5 +273,14 @@ export class Dragster implements IDrake {
     public get dragging(): boolean {
         if (this.draggedElement == null) return false;
         return this.draggedElement.isDragging();
+    }
+
+    protected setupEvents(): void {
+        // Subscribe to mousedown events to trigger Dragon
+        let mouseDownEvents = getEventNames('mousedown').map((eventName: string) => Observable.fromEvent(document.documentElement, eventName));
+
+        Observable.merge(...mouseDownEvents).subscribe(
+            (mouseDownEvent: MouseEvent) => this.grab(mouseDownEvent)
+        );
     }
 }
