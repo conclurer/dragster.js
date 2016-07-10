@@ -65,7 +65,7 @@ export interface IDragsterOptions {
     mirrorContainer?: HTMLElement;
 
     /**
-     * If true, the user is allowed to select text
+     * If true, the user is allowed to select text inside an input-like element
      */
     ignoreInputTextSelection?: boolean;
 

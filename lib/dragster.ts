@@ -2,7 +2,13 @@ import {IDragsterOptions, DrakeCloneConfigurator} from "./interfaces/dragster-op
 import {DragsterDefaultOptions} from "./dragster-default-options";
 import {IDrake} from "./interfaces/drake";
 import {IDragsterStartContext, IDragsterEvent} from "./interfaces/dragster-results";
-import {getParentElement, getNextSibling, getImmediateChild, getElementForPosition} from "./helpers/node-functions";
+import {
+    getParentElement,
+    getNextSibling,
+    getImmediateChild,
+    getElementForPosition,
+    isInput
+} from "./helpers/node-functions";
 import {Subject} from "rxjs/Subject";
 import "rxjs/add/operator/filter";
 import {DragonElement} from "./dragon-element";
@@ -99,6 +105,7 @@ export class Dragster implements IDrake {
         this.draggedElement = new DragonElement(context.item);
         this.draggedElement.dropTargetLocator = (element: HTMLElement, x: number, y: number) => this.findDropTarget(element, x, y);
         this.draggedElement.dragster = this;
+        this.draggedElement.ignoreInputTextSelection = this.options.ignoreInputTextSelection;
 
         // Subscribe to Dragon events
         this.draggedElementEventSubscription = this.draggedElement.events().subscribe((event: IDragsterEvent) => {
@@ -138,6 +145,10 @@ export class Dragster implements IDrake {
                     this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
                     break;
 
+                case 'cancelBeforeDragging':
+                    this.cleanup();
+                    break;
+
                 case 'dragend':
                     /** {@link DragsterDragEndEventHandler} */
                     this.emitMessage(event.channel, event.data);
@@ -150,6 +161,14 @@ export class Dragster implements IDrake {
 
         // Start drag operation
         this.draggedElement.grab(event);
+
+        // If triggering element is an inputfield element, focus it - else: cancel default
+        if (event.type == 'mousedown') {
+            let triggeringElement = <HTMLElement>event.target;
+
+            if (isInput(triggeringElement)) triggeringElement.focus();
+            else event.preventDefault();
+        }
     }
 
     private emitMessage(channel: string, data: any[]): void {

@@ -105,3 +105,21 @@ export function getElementForPosition(dropTarget: HTMLElement, target: HTMLEleme
         else return (y > rect.top + rect.height / 2) ? getNextSibling(target) : target;
     }
 }
+
+export function isInput(givenElement: HTMLElement): boolean {
+    let nativeInputElement = givenElement instanceof HTMLInputElement || givenElement instanceof HTMLTextAreaElement || givenElement instanceof HTMLSelectElement;
+    if (nativeInputElement) return true;
+
+    // Check if givenElement or one of its parent has contentEditable
+    do {
+        // Wait for explicit contentEditable statements
+        if (givenElement.contentEditable === 'true') return true;
+        if (givenElement.contentEditable === 'false') return false;
+
+        // Go up one level
+        givenElement = getParentElement(givenElement);
+
+    } while (givenElement != null);
+
+    return false;
+}

@@ -15,7 +15,8 @@ import {
     getElementBehindPoint,
     getImmediateChild,
     getElementForPosition,
-    getNextSibling
+    getNextSibling,
+    isInput
 } from "./helpers/node-functions";
 import {Dragster} from "./dragster";
 
@@ -57,6 +58,7 @@ export class DragonElement {
     // Drop Target Locator
     public dropTargetLocator: dropTargetLocator = DragonElement.defaultDropTargetLocator;
     public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
+    public ignoreInputTextSelection: boolean;
 
     public constructor(item: HTMLElement) {
         this.item = item;
@@ -127,9 +129,29 @@ export class DragonElement {
                     // Cancel if cancelled
                     if (this.isCancelled()) return;
 
-                    if (!this.isDragging()) this.initializeDrag();
+                    // Save mouse coordinates
+                    clientX = itemMovedEvent.clientX;
+                    clientY = itemMovedEvent.clientY;
 
-                    // todo: filter out "false" drags (mouse button must be 1)
+                    // Cancel dragging if wrong mouse button is pressed
+                    // Only possibility to detect mouse up in Inputfields
+                    if (whichMouseButton(itemMovedEvent) === 0) {
+                        this.release(clientX, clientY);
+                        return;
+                    }
+
+                    // Text selection inside an Input-like HTMLElement
+                    // If Dragster is configured to ignoreInputTextSelection, cancel event
+                    if (this.ignoreInputTextSelection && !this.isDragging()) {
+                        let elementBehindCursor = <HTMLElement>document.elementFromPoint(clientX, clientY);
+                        if (isInput(elementBehindCursor)) {
+                            this.release(clientX, clientY);
+                            return;
+                        }
+                    }
+
+                    // Initialize dragging
+                    if (!this.isDragging()) this.initializeDrag();
 
                     // Prevent default behavior
                     itemMovedEvent.preventDefault();
@@ -140,8 +162,6 @@ export class DragonElement {
                     let elementInnerY = this.itemOriginalCoordinates.y + (this.mouseCoordinatesOnStart.y - this.itemOriginalCoordinates.y);
 
                     // Calculate total x/y position
-                    clientX = itemMovedEvent.clientX;
-                    clientY = itemMovedEvent.clientY;
                     let x = clientX - elementInnerX;
                     let y = clientY - elementInnerY;
                     this.flyingItem.style.transform = `translate(${x}px, ${y}px)`;
@@ -151,7 +171,9 @@ export class DragonElement {
                 (error) => console.log(error),
 
                 // Executed when the user stops to drag one element
-                () => this.release(clientX, clientY)
+                () => {
+                    this.release(clientX, clientY);
+                }
             );
     }
 
@@ -271,7 +293,11 @@ export class DragonElement {
      */
     protected release(mouseX: number, mouseY: number): void {
         // Cancel if not dragging
-        if (!this.isDragging()) return;
+        if (!this.isDragging()) {
+            // Emit cancelBeforeDragging event to inform Dragster
+            this.emitter.next({channel: 'cancelBeforeDragging', data: []});
+            return;
+        }
 
         // Detect drop zone
         let overElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
