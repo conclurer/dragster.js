@@ -63,3 +63,8 @@ export type DragsterOverEventHandler = (movedElement?: HTMLElement,
 export type DragsterShadowEventHandler = (shadowElement?: HTMLElement,
                                           containerShadowIsIn?: HTMLElement,
                                           sourceContainer?: HTMLElement)=>any;
+
+// Remove Event
+export type DragsterRemoveEventHandler = (removedElement?: HTMLElement,
+                                          lastContainer?: HTMLElement,
+                                          sourceContainer?: HTMLElement)=>any;

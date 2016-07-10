@@ -59,6 +59,7 @@ export class DragonElement {
     public dropTargetLocator: dropTargetLocator = DragonElement.defaultDropTargetLocator;
     public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
     public ignoreInputTextSelection: boolean;
+    public removeOnSpill: boolean;
 
     public constructor(item: HTMLElement) {
         this.item = item;
@@ -308,8 +309,8 @@ export class DragonElement {
         if (dropZone != null) {
             this.drop(this.item, dropZone);
         }
-        else if (false) {
-            // todo: remove on spill
+        else if (this.removeOnSpill) {
+            this.remove();
         }
         else {
             this.cancel();
@@ -337,6 +338,23 @@ export class DragonElement {
         this.emitter.next({
             channel: 'drop',
             data: [item, target, this.currentSibling]
+        });
+
+        this.cleanup();
+    }
+
+    protected remove(): void {
+        // Cancel if not dragging
+        if (!this.isDragging()) return;
+
+        // Remove this.item
+        let parent = <HTMLElement>this.item.parentNode;
+        parent.removeChild(this.item);
+
+        // Emit remove event
+        this.emitter.next({
+            channel: 'remove',
+            data: [this.item, parent]
         });
 
         this.cleanup();
@@ -444,4 +462,7 @@ export class DragonElement {
     public static defaultDropTargetLocator(elementFlownOver: HTMLElement, mouseX: number, mouseY: number): HTMLElement {
         return null;
     }
+
+    // Index Signature for DragonElement
+    [key: string]: any;
 }

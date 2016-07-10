@@ -105,7 +105,12 @@ export class Dragster implements IDrake {
         this.draggedElement = new DragonElement(context.item);
         this.draggedElement.dropTargetLocator = (element: HTMLElement, x: number, y: number) => this.findDropTarget(element, x, y);
         this.draggedElement.dragster = this;
-        this.draggedElement.ignoreInputTextSelection = this.options.ignoreInputTextSelection;
+
+        // Pass over settings from this.options;
+        let settingsToPass = ['ignoreInputTextSelection', 'removeOnSpill'];
+        for (let setting of settingsToPass) {
+            this.draggedElement[setting] = this.options[setting];
+        }
 
         // Subscribe to Dragon events
         this.draggedElementEventSubscription = this.draggedElement.events().subscribe((event: IDragsterEvent) => {
@@ -139,6 +144,11 @@ export class Dragster implements IDrake {
                 case 'drop':
                     // Execute drop event handler
                     this.drop(event.data[0], event.data[1], event.data[2]);
+                    break;
+
+                case 'remove':
+                    /** {@link DragsterRemoveEventHandler} */
+                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
                     break;
 
                 case 'cancel':
