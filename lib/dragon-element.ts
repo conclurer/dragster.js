@@ -9,7 +9,8 @@ import {
     IDragsterEvent,
     IDragonItemCoordinates,
     dropTargetLocator,
-    shadowElementProvider
+    shadowElementProvider,
+    IDragonDropZone
 } from "./interfaces/dragster-results";
 import {
     getElementBehindPoint,
@@ -60,6 +61,10 @@ export class DragonElement {
     public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
     public ignoreInputTextSelection: boolean;
     public removeOnSpill: boolean;
+    public revertOnSpill: boolean;
+    public originalContainer: HTMLElement;
+    public originalSibling: HTMLElement;
+    public direction: string;
 
     public constructor(item: HTMLElement) {
         this.item = item;
@@ -217,10 +222,19 @@ export class DragonElement {
      */
     protected detectDropZone(mouseX: number, mouseY: number): void {
         let overElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
-        let dropZone = this.dropTargetLocator(overElement, mouseX, mouseY);
+        let dropZoneContainer = this.dropTargetLocator(overElement, mouseX, mouseY);
+        let dropZone: IDragonDropZone = null;
+
+        // Find default drop zone configuration (for dropZone)
+        if (dropZoneContainer != null) {
+            dropZone = this.detectCurrentDropZonePosition(dropZoneContainer, overElement, mouseX, mouseY);
+        }
+
+        // Fallback to revertable drop zone if revertOnSpill flag is given
+        if (dropZone == null) dropZone = this.detectRevertableDropZone();
 
         // Determine whether the drop target did change
-        let dropTargetDidChange = (dropZone != null && dropZone !== this.lastDropTarget);
+        let dropTargetDidChange = (dropZone != null && dropZone.container !== this.lastDropTarget);
 
         // Re-assign lastDropZone and trigger events
         if (dropTargetDidChange || dropZone == null) {
@@ -232,7 +246,7 @@ export class DragonElement {
                 });
             }
 
-            this.lastDropTarget = dropZone;
+            this.lastDropTarget = dropZone == null ? null : dropZone.container;
 
             // Emit over event
             if (this.lastDropTarget != null) {
@@ -246,25 +260,9 @@ export class DragonElement {
         // Cancel if dropZone is null
         if (dropZone == null) return;
 
-        // Find child in Drop Zone
-        let immediate = getImmediateChild(dropZone, overElement);
-        let reference: HTMLElement;
-
-        // Perform checks on immediate
-        if (immediate != null) {
-            // todo: pass direction
-            reference = getElementForPosition(dropZone, immediate, mouseX, mouseY, 'vertical');
-        }
-        // todo: pass revert on spill
-        else if (false) {
-            // todo: revert on spill
-        }
-        // Cancel if no condition applies
-        else return;
-
         // Check conditions for adding shadow to dropZone
-        if ((reference == null && dropTargetDidChange) || reference !== this.shadowItem && reference !== getNextSibling(this.shadowItem)) {
-            this.currentSibling = reference;
+        if ((dropZone.nextSibling == null && dropTargetDidChange) || dropZone.nextSibling !== this.shadowItem && dropZone.nextSibling !== getNextSibling(this.shadowItem)) {
+            this.currentSibling = dropZone.nextSibling;
 
             // Remove existing shadow item if present
             // Do not remove it if it is the original item
@@ -274,17 +272,50 @@ export class DragonElement {
             }
 
             // Create new shadowItem
-            this.shadowItem = this.shadowElementProvider(this.item, dropZone);
+            this.shadowItem = this.shadowElementProvider(this.item, dropZone.container);
 
             // Insert shadowItem
-            dropZone.insertBefore(this.shadowItem, reference);
+            dropZone.container.insertBefore(this.shadowItem, dropZone.nextSibling);
 
             // Emit shadow event
             this.emitter.next({
                 channel: 'shadow',
-                data: [this.shadowItem, dropZone]
+                data: [this.shadowItem, dropZone.container]
             });
         }
+    }
+
+    /**
+     * Detects the drop zone at the current position. Returns null if no drop zone is assignable.
+     * @param detectedDropZone
+     * @param elementWithin
+     * @param mouseX
+     * @param mouseY
+     * @returns {IDragonDropZone}
+     */
+    protected detectCurrentDropZonePosition(detectedDropZone: HTMLElement, elementWithin: HTMLElement, mouseX: number, mouseY: number): IDragonDropZone {
+        if (detectedDropZone == null) return null;
+
+        // Find child in Drop Zone
+        let immediate = getImmediateChild(detectedDropZone, elementWithin);
+
+        if (immediate != null) {
+            let reference = getElementForPosition(detectedDropZone, immediate, mouseX, mouseY, this.direction);
+
+            // Return dropZone
+            return {container: detectedDropZone, nextSibling: reference};
+        }
+        else return null;
+    }
+
+    /**
+     * Returns the revertable drop zoen if revertOnSpill is active.
+     * @returns {IDragonDropZone}
+     */
+    protected detectRevertableDropZone(): IDragonDropZone {
+        if (!this.revertOnSpill) return null;
+
+        return {container: this.originalContainer, nextSibling: this.originalSibling};
     }
 
     /**

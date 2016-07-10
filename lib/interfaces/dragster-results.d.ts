@@ -8,7 +8,7 @@ export interface IDragsterEvent {
     data: any[];
 }
 
-export interface MouseEventMapping {
+export interface IMouseEventMapping {
     mouseup: string;
     mousedown: string;
     mousemove: string;
@@ -18,6 +18,11 @@ export interface MouseEventMapping {
 export interface IDragonItemCoordinates {
     x: number,
     y: number;
+}
+
+export interface IDragonDropZone {
+    container: HTMLElement;
+    nextSibling: HTMLElement;
 }
 
 export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number)=>HTMLElement;

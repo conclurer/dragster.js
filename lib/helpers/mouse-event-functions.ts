@@ -1,4 +1,4 @@
-import {MouseEventMapping, mouseEventName} from "../interfaces/dragster-results";
+import {IMouseEventMapping, mouseEventName} from "../interfaces/dragster-results";
 export function whichMouseButton(event: (MouseEvent|TouchEvent)): number {
     if (event instanceof TouchEvent) {
         let e = <TouchEvent>event;
@@ -19,17 +19,17 @@ export function whichMouseButton(event: (MouseEvent|TouchEvent)): number {
 }
 
 export function getEventNames(defaultEvent: mouseEventName): string[] {
-    let touch = <MouseEventMapping>{
+    let touch = <IMouseEventMapping>{
         mouseup: 'touchend',
         mousedown: 'touchstart',
         mousemove: 'touchmove'
     };
-    let pointers = <MouseEventMapping>{
+    let pointers = <IMouseEventMapping>{
         mouseup: 'pointerup',
         mousedown: 'pointerdown',
         mousemove: 'pointermove'
     };
-    let microsoft = <MouseEventMapping>{
+    let microsoft = <IMouseEventMapping>{
         mouseup: 'MSPointerUp',
         mousedown: 'MSPointerDown',
         mousemove: 'MSPointerMove'

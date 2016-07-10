@@ -105,9 +105,11 @@ export class Dragster implements IDrake {
         this.draggedElement = new DragonElement(context.item);
         this.draggedElement.dropTargetLocator = (element: HTMLElement, x: number, y: number) => this.findDropTarget(element, x, y);
         this.draggedElement.dragster = this;
+        this.draggedElement.originalContainer = this.originalContainer;
+        this.draggedElement.originalSibling = this.originalSibling;
 
         // Pass over settings from this.options;
-        let settingsToPass = ['ignoreInputTextSelection', 'removeOnSpill'];
+        let settingsToPass = ['ignoreInputTextSelection', 'removeOnSpill', 'revertOnSpill', 'direction'];
         for (let setting of settingsToPass) {
             this.draggedElement[setting] = this.options[setting];
         }
