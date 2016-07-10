@@ -1,6 +1,3 @@
-import {dragula} from "../../lib/dragula";
-
-//var crossvent = require('crossvent');
 var sortable = $('sortable');
 
 dragula([$('left-defaults'), $('right-defaults')]);

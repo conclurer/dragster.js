@@ -1,8 +1,12 @@
 # Ignore WebStorm
 .idea
 
+# Ignore logs
+npm-debug.log
+
 # External dependencies
 node_modules
+typings
 
 # Generated files
 **/*.js
@@ -12,7 +16,7 @@ node_modules
 
 # Dist
 dist
+!dist/*.js
 
 # Example
 !demo/*
-demo/example.js
