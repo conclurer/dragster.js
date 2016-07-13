@@ -24,10 +24,10 @@ export interface IDragonItemCoordinates {
 
 export interface IDragonDropZone {
     container: HTMLElement;
-    nextSibling: HTMLElement;
+    nextSibling: HTMLElement | null;
 }
 
-export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number) => HTMLElement;
+export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number) => HTMLElement | null;
 export type shadowElementProvider = (elementInMotion: HTMLElement, shadowContainer: HTMLElement) => HTMLElement;
 
 export type mouseEventName = 'mouseup' | 'mousedown' | 'mousemove';

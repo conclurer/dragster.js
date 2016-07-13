@@ -1,22 +1,22 @@
-import {IDragsterOptions, DrakeCloneConfigurator} from "./interfaces/dragster-options";
-import {DragsterDefaultOptions} from "./dragster-default-options";
-import {IDrake} from "./interfaces/drake";
-import {IDragsterStartContext, IDragsterEvent} from "./interfaces/dragster-results";
+import {IDragsterOptions, DrakeCloneConfigurator} from './interfaces/dragster-options';
+import {DragsterDefaultOptions} from './dragster-default-options';
+import {IDrake} from './interfaces/drake';
+import {IDragsterStartContext, IDragsterEvent} from './interfaces/dragster-results';
 import {
     getParentElement,
     getNextSibling,
     getImmediateChild,
     getElementForPosition,
     isInput
-} from "./helpers/node-functions";
-import {Subject} from "rxjs/Subject";
-import "rxjs/add/operator/filter";
-import {DragonElement} from "./dragon-element";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/observable/fromEvent";
-import "rxjs/add/observable/merge";
-import {getEventNames} from "./helpers/mouse-event-functions";
-import {Subscription} from "rxjs/Subscription";
+} from './helpers/node-functions';
+import {Subject} from 'rxjs/Subject';
+import 'rxjs/add/operator/filter';
+import {DragonElement} from './dragon-element';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import 'rxjs/add/observable/merge';
+import {getEventNames} from './helpers/mouse-event-functions';
+import {Subscription} from 'rxjs/Subscription';
 
 export class Dragster implements IDrake {
     // Instance variables
@@ -268,7 +268,7 @@ export class Dragster implements IDrake {
      * @param sibling
      * @returns {boolean}
      */
-    public isInInitialPlacement(container: HTMLElement, sibling?: HTMLElement): boolean {
+    public isInInitialPlacement(container: HTMLElement | null, sibling?: HTMLElement | null): boolean {
         let sib: HTMLElement;
 
         //Determine element to detect positioning
