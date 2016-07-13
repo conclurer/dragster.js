@@ -70,7 +70,7 @@ export interface IDragsterOptions {
     ignoreInputTextSelection?: boolean;
 
     // Index signature
-    [key: string]: any;
+    [key: string]: boolean | HTMLElement | string | undefined | Function;
 }
 
 /**
@@ -78,4 +78,4 @@ export interface IDragsterOptions {
  * @param triggeringElement
  * @param sourceContainer
  */
-export type DrakeCloneConfigurator = (triggeringElement?: HTMLElement, sourceContainer?: HTMLElement)=>boolean;
+export type DrakeCloneConfigurator = (triggeringElement?: HTMLElement, sourceContainer?: HTMLElement) => boolean;
