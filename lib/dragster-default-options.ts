@@ -1,4 +1,4 @@
-import {IDragsterOptions} from './interfaces/dragster-options';
+import {IDragsterOptions, DrakeDirection} from './interfaces/dragster-options';
 
 export class DragsterDefaultOptions implements IDragsterOptions {
 
@@ -33,7 +33,7 @@ export class DragsterDefaultOptions implements IDragsterOptions {
     public removeOnSpill: boolean = false;
 
     // By default, the Y axis is considered
-    public direction: 'vertical' | 'horizontal' = 'vertical';
+    public direction: DrakeDirection = 'vertical';
 
     // By default, mirrored images are applied to body
     public mirrorContainer: HTMLElement = document.body;

@@ -57,7 +57,7 @@ export interface IDragsterOptions {
     /**
      * Determines the axis that is considered when placing the dropped element inside the DOM
      */
-    direction?: 'vertical' | 'horizontal';
+    direction?: DrakeDirection;
 
     /**
      * The container in which the mirrored element will be displayed.
@@ -79,3 +79,5 @@ export interface IDragsterOptions {
  * @param sourceContainer
  */
 export type DrakeCloneConfigurator = (triggeringElement?: HTMLElement, sourceContainer?: HTMLElement) => boolean;
+
+export type DrakeDirection = 'vertical' | 'horizontal';
