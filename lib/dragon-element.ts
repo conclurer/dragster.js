@@ -19,17 +19,13 @@ import {
     getNextSibling,
     isInput
 } from './helpers/node-functions';
-import {Dragster} from './dragster';
+import {IDragsterOptions} from './interfaces/dragster-options';
 
 /**
  * DragonElement
  * Dragster's dragon'drop handler for one HTMLElement
  */
 export class DragonElement {
-    // Instance variables
-    // Parent Dragster Instance
-    public dragster: Dragster | null = null;
-
     // HTML Element to watch
     protected item: HTMLElement;
     protected itemOriginalCoordinates: IDragonItemCoordinates;
@@ -57,17 +53,55 @@ export class DragonElement {
 
     // Configuration
     // Drop Target Locator
+    // todo: move to config
     public dropTargetLocator: dropTargetLocator = DragonElement.defaultDropTargetLocator;
     public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
-    public ignoreInputTextSelection: boolean;
-    public removeOnSpill: boolean;
-    public revertOnSpill: boolean;
-    public originalContainer: HTMLElement;
-    public originalSibling: HTMLElement;
-    public direction: string;
 
-    public constructor(item: HTMLElement) {
+    // Options for this
+    protected options: IDragsterOptions;
+
+    // This is where this.item originally came from
+    protected originalContainer: HTMLElement;
+
+    // This is this.item's original sibling, null if this.item was the last element inside this.originalContainer
+    protected originalSibling: HTMLElement | null;
+
+    // public ignoreInputTextSelection: boolean;
+    // public removeOnSpill: boolean;
+    // public revertOnSpill: boolean;
+
+    // public direction: string;
+
+    public constructor(item: HTMLElement, options: IDragsterOptions) {
         this.item = item;
+        this.options = options;
+    }
+
+    /**
+     * Sets the origin of the item being dragged
+     * @param originalContainer
+     * @param originalSibling
+     */
+    public setOrigin(originalContainer: HTMLElement, originalSibling: HTMLElement | null): void {
+        this.originalContainer = originalContainer;
+        this.originalSibling = originalSibling;
+    }
+
+    /**
+     * Returns true if the given container and sibling match the initial container and sibling
+     * @param container
+     * @param sibling
+     * @returns {boolean}
+     */
+    protected isInInitialPlacement(container: HTMLElement | null, sibling?: HTMLElement | null): boolean {
+        let sib: HTMLElement | null;
+
+        // Determine element to detect positioning
+        if (sibling) sib = sibling;
+        // todo else if (this.dragon.hasMirror()) sib = this.dragon.currentSibling;
+        else sib = this.originalSibling;
+
+        return container === this.originalContainer && sib === this.originalSibling;
     }
 
     /**
@@ -148,7 +182,7 @@ export class DragonElement {
 
                     // Text selection inside an Input-like HTMLElement
                     // If Dragster is configured to ignoreInputTextSelection, cancel event
-                    if (this.ignoreInputTextSelection && !this.isDragging()) {
+                    if (this.options.ignoreInputTextSelection && !this.isDragging()) {
                         let elementBehindCursor: HTMLElement = <HTMLElement>document.elementFromPoint(clientX, clientY);
                         if (isInput(elementBehindCursor)) {
                             this.release(clientX, clientY);
@@ -314,12 +348,13 @@ export class DragonElement {
      */
     protected detectCurrentDropZonePosition(detectedDropZone: HTMLElement, elementWithin: HTMLElement, mouseX: number, mouseY: number): IDragonDropZone | null {
         if (detectedDropZone == null) return null;
+        if (this.options.direction == null) return null;
 
         // Find child in Drop Zone
         let immediate: HTMLElement | null = getImmediateChild(detectedDropZone, elementWithin);
 
         if (immediate != null) {
-            let reference: HTMLElement | null = getElementForPosition(detectedDropZone, immediate, mouseX, mouseY, this.direction);
+            let reference: HTMLElement | null = getElementForPosition(detectedDropZone, immediate, mouseX, mouseY, this.options.direction);
 
             // Return dropZone
             return {container: detectedDropZone, nextSibling: reference};
@@ -332,7 +367,7 @@ export class DragonElement {
      * @returns {IDragonDropZone}
      */
     protected detectRevertableDropZone(): IDragonDropZone | null {
-        if (!this.revertOnSpill) return null;
+        if (!this.options.revertOnSpill) return null;
 
         return {container: this.originalContainer, nextSibling: this.originalSibling};
     }
@@ -362,7 +397,7 @@ export class DragonElement {
         if (dropZone != null) {
             this.drop(this.item, dropZone);
         }
-        else if (this.removeOnSpill) {
+        else if (this.options.removeOnSpill) {
             this.remove();
         }
         else {
@@ -421,15 +456,12 @@ export class DragonElement {
         // Cancel if not dragging
         if (!this.isDragging()) return;
 
-        // Cancel if Dragster is not defined
-        if (this.dragster == null) return;
-
         let reverts: boolean = false; // todo use revert on spill
         if (revert) reverts = true;
 
-        let isInInitialPosition: boolean = this.dragster.isInInitialPlacement(this.lastDropTarget, this.currentSibling);
+        let isInInitialPosition: boolean = this.isInInitialPlacement(this.lastDropTarget, this.currentSibling);
         if (!isInInitialPosition && reverts) {
-            this.dragster.currentSourceContainer().insertBefore(this.item, this.dragster.currentSourceSibling());
+            this.originalContainer.insertBefore(this.item, this.originalSibling);
         }
 
         if (isInInitialPosition || reverts) {
