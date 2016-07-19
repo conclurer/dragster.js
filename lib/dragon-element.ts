@@ -66,12 +66,6 @@ export class DragonElement {
     // This is this.item's original sibling, null if this.item was the last element inside this.originalContainer
     protected originalSibling: HTMLElement | null;
 
-    // public ignoreInputTextSelection: boolean;
-    // public removeOnSpill: boolean;
-    // public revertOnSpill: boolean;
-
-    // public direction: string;
-
     public constructor(item: HTMLElement, options: IDragsterOptions) {
         this.item = item;
         this.options = options;
@@ -230,7 +224,8 @@ export class DragonElement {
         // Send out start event
         this.emitter.next({
             channel: 'drag',
-            data: [this.item]
+            /** {@link DragsterDragEventHandler} */
+            data: [this.item, this.originalContainer]
         });
 
         // Get offset coordinates for this.item
@@ -285,7 +280,8 @@ export class DragonElement {
             if (this.lastDropTarget != null) {
                 this.emitter.next({
                     channel: 'out',
-                    data: [this.item, this.lastDropTarget]
+                    /** {@link DragsterOutEventHandler} */
+                    data: [this.item, this.lastDropTarget, this.originalContainer]
                 });
             }
 
@@ -295,7 +291,8 @@ export class DragonElement {
             if (this.lastDropTarget != null) {
                 this.emitter.next({
                     channel: 'over',
-                    data: [this.item, this.lastDropTarget]
+                    /** {@link DragsterOverEventHandler} */
+                    data: [this.item, this.lastDropTarget, this.originalContainer]
                 });
             }
         }
@@ -333,7 +330,8 @@ export class DragonElement {
             // Emit shadow event
             this.emitter.next({
                 channel: 'shadow',
-                data: [this.shadowItem, dropZone.container]
+                /** {@link DragsterShadowEventHandler} */
+                data: [this.shadowItem, dropZone.container, this.originalContainer]
             });
         }
     }
@@ -425,6 +423,7 @@ export class DragonElement {
         // Emit drop event
         this.emitter.next({
             channel: 'drop',
+            /** {@link DragsterDropEventHandler} */
             data: [item, target, this.currentSibling]
         });
 
@@ -442,7 +441,8 @@ export class DragonElement {
         // Emit remove event
         this.emitter.next({
             channel: 'remove',
-            data: [this.item, parent]
+            /** {@link DragsterRemoveEventHandler} */
+            data: [this.item, parent, this.originalContainer]
         });
 
         this.cleanup();
@@ -468,13 +468,15 @@ export class DragonElement {
             // Emit cancel event
             this.emitter.next({
                 channel: 'cancel',
-                data: [this.item, this.lastDropTarget]
+                /** {@link DragsterCancelEventHandler} */
+                data: [this.item, this.lastDropTarget, this.originalContainer]
             });
         }
         else {
             // Emit drop event
             this.emitter.next({
                 channel: 'drop',
+                /** {@link DragsterDropEventHandler} */
                 data: [this.item, this.lastDropTarget, this.currentSibling]
             });
         }
@@ -496,13 +498,15 @@ export class DragonElement {
         if (this.lastDropTarget != null) {
             this.emitter.next({
                 channel: 'out',
-                data: [this.item, this.lastDropTarget]
+                /** {@link DragsterOutEventHandler} */
+                data: [this.item, this.lastDropTarget, this.originalContainer]
             });
         }
 
         // Emit dragend event
         this.emitter.next({
             channel: 'dragend',
+            /** {@link DragsterDragEndEventHandler} */
             data: [this.item]
         });
 

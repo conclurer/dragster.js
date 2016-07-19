@@ -120,7 +120,7 @@ export class Dragster implements IDrake {
                 // Drag Event
                 case 'drag':
                     /** {@link DragsterDragEventHandler} */
-                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    this.emitMessage(event.channel, event.data);
                     break;
 
                 case 'cloned':
@@ -130,17 +130,17 @@ export class Dragster implements IDrake {
 
                 case 'out':
                     /** {@link DragsterOutEventHandler} */
-                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    this.emitMessage(event.channel, event.data);
                     break;
 
                 case 'over':
                     /** {@link DragsterOverEventHandler} */
-                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    this.emitMessage(event.channel, event.data);
                     break;
 
                 case 'shadow':
                     /** {@link DragsterShadowEventHandler} */
-                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    this.emitMessage(event.channel, event.data);
                     break;
 
                 case 'drop':
@@ -150,11 +150,11 @@ export class Dragster implements IDrake {
 
                 case 'remove':
                     /** {@link DragsterRemoveEventHandler} */
-                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    this.emitMessage(event.channel, event.data);
                     break;
 
                 case 'cancel':
-                    this.emitMessage(event.channel, event.data.concat([this.originalContainer]));
+                    this.emitMessage(event.channel, event.data);
                     break;
 
                 case 'cancelBeforeDragging':
