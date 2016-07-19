@@ -57,7 +57,7 @@ export interface IDragsterOptions {
     /**
      * Determines the axis that is considered when placing the dropped element inside the DOM
      */
-    direction?: string;
+    direction?: 'vertical' | 'horizontal';
 
     /**
      * The container in which the mirrored element will be displayed.

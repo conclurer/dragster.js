@@ -1,4 +1,4 @@
-import {IDragsterOptions} from "./interfaces/dragster-options";
+import {IDragsterOptions} from './interfaces/dragster-options';
 
 export class DragsterDefaultOptions implements IDragsterOptions {
 
@@ -23,21 +23,24 @@ export class DragsterDefaultOptions implements IDragsterOptions {
     }
 
     // No element will be cloned by default
-    public copy = false;
+    public copy: boolean = false;
 
     // No sorting of source containers
-    public copySortSource = false;
+    public copySortSource: boolean = false;
 
     // Follow shadow for spilling behavior
-    public revertOnSpill = false;
-    public removeOnSpill = false;
+    public revertOnSpill: boolean = false;
+    public removeOnSpill: boolean = false;
 
     // By default, the Y axis is considered
-    public direction = "vertical";
+    public direction: 'vertical' | 'horizontal' = 'vertical';
 
     // By default, mirrored images are applied to body
-    public mirrorContainer = document.body;
+    public mirrorContainer: HTMLElement = document.body;
 
     // By default, text selection is disallowed
-    public ignoreInputTextSelection = true;
+    public ignoreInputTextSelection: boolean = true;
+
+    // Index signature
+    [key: string]: boolean | HTMLElement | string | undefined | Function;
 }
