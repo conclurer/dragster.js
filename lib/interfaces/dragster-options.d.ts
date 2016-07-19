@@ -8,7 +8,7 @@ export interface IDragsterOptions {
      * @param dragHandle
      * @param sibling
      */
-    moves?(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, dragHandle?: HTMLElement, sibling?: HTMLElement): boolean;
+    moves?(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, dragHandle?: HTMLElement, sibling?: HTMLElement | null): boolean;
 
     /**
      * If true, triggeringElement from sourceContainer can be moved into targetContainer
@@ -17,7 +17,7 @@ export interface IDragsterOptions {
      * @param sourceContainer
      * @param sibling
      */
-    accepts?(triggeringElement?: HTMLElement, targetContainer?: HTMLElement, sourceContainer?: HTMLElement, sibling?: HTMLElement): boolean;
+    accepts?(triggeringElement?: HTMLElement, targetContainer?: HTMLElement, sourceContainer?: HTMLElement, sibling?: HTMLElement | null): boolean;
 
     /**
      * If true, triggeringElement cannot be dragged
@@ -32,6 +32,12 @@ export interface IDragsterOptions {
      * @param container
      */
     isContainer?(container?: HTMLElement): boolean;
+
+    /**
+     * The item returned is the flying element dragged while the user presses down their mouse button
+     * @param originalElement
+     */
+    flyingElementProvider?: DragsterFlyingElementProvider;
 
     /**
      * If true or returning true, the element dragged will be cloned on drop.
@@ -81,3 +87,9 @@ export interface IDragsterOptions {
 export type DrakeCloneConfigurator = (triggeringElement?: HTMLElement, sourceContainer?: HTMLElement) => boolean;
 
 export type DrakeDirection = 'vertical' | 'horizontal';
+
+/**
+ * The item returned is the flying element dragged while the user presses down their mouse button
+ * @param originalElement
+ */
+export type DragsterFlyingElementProvider = (originalElement?: HTMLElement) => HTMLElement;

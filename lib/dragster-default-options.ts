@@ -1,6 +1,8 @@
-import {IDragsterOptions, DrakeDirection} from './interfaces/dragster-options';
+import {DrakeDirection, DragsterFlyingElementProvider} from './interfaces/dragster-options';
+import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
+import {dragsterDefaultFlyingElementProvider} from './helpers/flying-element-provider';
 
-export class DragsterDefaultOptions implements IDragsterOptions {
+export class DragsterDefaultOptions implements IDragsterOptionsForced {
 
     public moves(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, dragHandle?: HTMLElement, sibling?: HTMLElement): boolean {
         // All elements are draggable by default
@@ -21,6 +23,8 @@ export class DragsterDefaultOptions implements IDragsterOptions {
         // No other container beside the default specified containers is a valid container
         return false;
     }
+
+    public flyingElementProvider: DragsterFlyingElementProvider = dragsterDefaultFlyingElementProvider;
 
     // No element will be cloned by default
     public copy: boolean = false;

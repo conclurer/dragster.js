@@ -8,7 +8,6 @@ import {Subject} from 'rxjs/Subject';
 import {
     IDragsterEvent,
     IDragonItemCoordinates,
-    dropTargetLocator,
     shadowElementProvider,
     IDragonDropZone
 } from './interfaces/dragster-results';
@@ -17,9 +16,11 @@ import {
     getImmediateChild,
     getElementForPosition,
     getNextSibling,
-    isInput
+    isInput,
+    getParentElement
 } from './helpers/node-functions';
-import {IDragsterOptions} from './interfaces/dragster-options';
+import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
+import {Dragster} from './dragster';
 
 /**
  * DragonElement
@@ -54,11 +55,10 @@ export class DragonElement {
     // Configuration
     // Drop Target Locator
     // todo: move to config
-    public dropTargetLocator: dropTargetLocator = DragonElement.defaultDropTargetLocator;
     public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
 
     // Options for this
-    protected options: IDragsterOptions;
+    protected options: IDragsterOptionsForced;
 
     // This is where this.item originally came from
     protected originalContainer: HTMLElement;
@@ -66,9 +66,13 @@ export class DragonElement {
     // This is this.item's original sibling, null if this.item was the last element inside this.originalContainer
     protected originalSibling: HTMLElement | null;
 
-    public constructor(item: HTMLElement, options: IDragsterOptions) {
+    // Link to Dragster instance of origin
+    protected dragster: Dragster;
+
+    public constructor(item: HTMLElement, options: IDragsterOptionsForced, dragster: Dragster) {
         this.item = item;
         this.options = options;
+        this.dragster = dragster;
     }
 
     /**
@@ -237,8 +241,7 @@ export class DragonElement {
 
         // todo apply class (.gu-transit) to dragged element (+ hook)
 
-        // todo: hook for flying mirror
-        this.flyingItem = DragonElement.defaultFlyingElementProvider(this.item);
+        this.flyingItem = this.options.flyingElementProvider(this.item);
 
         // Send out cloned event
         this.emitter.next({
@@ -260,7 +263,7 @@ export class DragonElement {
         if (this.flyingItem == null) return;
 
         let overElement: HTMLElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
-        let dropZoneContainer: HTMLElement | null = this.dropTargetLocator(overElement, mouseX, mouseY);
+        let dropZoneContainer: HTMLElement | null = this.findDropTarget(overElement, mouseX, mouseY);
         let dropZone: IDragonDropZone | null = null;
 
         // Find default drop zone configuration (for dropZone)
@@ -388,7 +391,7 @@ export class DragonElement {
 
         // Detect drop zone
         let overElement: HTMLElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
-        let dropZone: HTMLElement | null = this.dropTargetLocator(overElement, mouseX, mouseY);
+        let dropZone: HTMLElement | null = this.findDropTarget(overElement, mouseX, mouseY);
 
         // todo: custom condition for copy drops
         // todo: dropTarget && ((_copy && o.copySortSource) || (!_copy || dropTarget !== _source))
@@ -420,12 +423,22 @@ export class DragonElement {
         // Cancel if not dragging
         if (!this.isDragging()) return;
 
-        // Emit drop event
-        this.emitter.next({
-            channel: 'drop',
-            /** {@link DragsterDropEventHandler} */
-            data: [item, target, this.currentSibling]
-        });
+        // If dropped at initial position, emit cancel event instead of drop event
+        if (this.isInInitialPlacement(target, this.currentSibling)) {
+            this.emitter.next({
+                channel: 'cancel',
+                /** {@link DragsterCancelEventHandler} */
+                data: [item, target, this.originalContainer]
+            });
+        }
+        else {
+            // Emit drop event
+            this.emitter.next({
+                channel: 'drop',
+                /** {@link DragsterDropEventHandler} */
+                data: [item, target, this.currentSibling]
+            });
+        }
 
         this.cleanup();
     }
@@ -515,26 +528,46 @@ export class DragonElement {
     }
 
     /**
-     * Dragon's default provider for flyingElement. This will clone the original element and append it to the body. #todo
-     * @param originalElement
+     * Finds a drop target below elementFlownOver at cursor position mouseX|mouseY
+     * @param elementFlownOver
+     * @param mouseX
+     * @param mouseY
      * @returns {HTMLElement}
      */
-    public static defaultFlyingElementProvider(originalElement: HTMLElement): HTMLElement {
-        let rect: ClientRect = originalElement.getBoundingClientRect();
+    protected findDropTarget(elementFlownOver: HTMLElement, mouseX: number, mouseY: number): HTMLElement | null {
+        let target: HTMLElement | null = elementFlownOver;
 
-        // copy given element and apply it to given container
-        let mirror: HTMLElement = <HTMLElement>originalElement.cloneNode(true);
-        mirror.style.width = `${rect.width}px`;
-        mirror.style.height = `${rect.height}px`;
-        mirror.style.top = `${rect.top}px`;
-        mirror.style.left = `${rect.left}px`;
-        mirror.classList.add('gu-mirror');
-        mirror.classList.remove('gu-transit');
-        // todo: use options.mirrorContainer
-        document.body.appendChild(mirror);
-        document.body.classList.add('gu-unselectable');
+        do {
+            // Skip if the given element is not a valid container element
+            if (!this.isContainer(target)) {
+                target = getParentElement(target);
+                continue;
+            }
 
-        return mirror;
+            // Detect immediate child element of target, cancel if it does not exist
+            let immediate: HTMLElement | null = getImmediateChild(target, elementFlownOver);
+            if (immediate == null) return null;
+
+            let elementAtPosition: HTMLElement | null = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
+
+            // An element should always be allowed to drop back to its origin
+            if (this.isInInitialPlacement(target, elementAtPosition)) break;
+
+            // Use options to detect if able to drop
+            if (this.options.accepts(this.item, target, this.originalContainer, elementAtPosition)) break;
+
+        } while (target != null);
+
+        return target;
+    }
+
+    /**
+     * Returns true if the given item is a container of this
+     * {@link Dragster#isContainer}
+     * @param item
+     */
+    protected isContainer(item: HTMLElement): boolean {
+        return this.dragster.isContainer(item);
     }
 
     /**
@@ -545,17 +578,6 @@ export class DragonElement {
      */
     public static defaultShadowElementProvider(itemInMotion: HTMLElement, shadowContainer: HTMLElement): HTMLElement {
         return itemInMotion;
-    }
-
-    /**
-     * Dragon's default drop target locator. This will return no drop target at all.
-     * @param elementFlownOver
-     * @param mouseX
-     * @param mouseY
-     * @returns {null}
-     */
-    public static defaultDropTargetLocator(elementFlownOver: HTMLElement, mouseX: number, mouseY: number): HTMLElement | null {
-        return null;
     }
 
     // Index Signature for DragonElement

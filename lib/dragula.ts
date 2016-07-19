@@ -1,5 +1,5 @@
-import {IDragsterOptions} from "./interfaces/dragster-options";
-import {Dragster} from "./dragster";
+import {IDragsterOptions} from './interfaces/dragster-options';
+import {Dragster} from './dragster';
 
 /**
  * Initializes a new Dragster instance
@@ -16,11 +16,17 @@ export function dragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions), optio
  * @param options
  */
 export function dragula(initialNodes: HTMLElement[], options?: IDragsterOptions): any {
-    let numArgs = arguments.length;
-    if (numArgs == 1 && Array.isArray(initialNodes) === false) {
+    let numArgs: number = arguments.length;
+    if (numArgs === 1 && Array.isArray(initialNodes) === false) {
         // Only options is given, reset arguments
+        // tslint:disable-next-line
         options = <any>initialNodes;
         initialNodes = [];
+    }
+
+    // Set empty options array if options not given
+    if (options == null) {
+        options = {};
     }
 
     return new Dragster(options, ...initialNodes);

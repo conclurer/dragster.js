@@ -27,7 +27,6 @@ export interface IDragonDropZone {
     nextSibling: HTMLElement | null;
 }
 
-export type dropTargetLocator = (elementFlownOver: HTMLElement, mouseX: number, mouseY: number) => HTMLElement | null;
 export type shadowElementProvider = (elementInMotion: HTMLElement, shadowContainer: HTMLElement) => HTMLElement;
 
 export type mouseEventName = 'mouseup' | 'mousedown' | 'mousemove';
