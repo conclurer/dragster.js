@@ -1,3 +1,5 @@
+import {DrakeDirection} from '../interfaces/dragster-options';
+
 /**
  * Returns the parent element of a given element or null when hitting the root node
  * @param givenElement
@@ -81,7 +83,7 @@ export function getImmediateChild(container: HTMLElement, childOfContainer: HTML
  * @param direction
  * @returns {HTMLElement}
  */
-export function getElementForPosition(dropTarget: HTMLElement, target: HTMLElement, x: number, y: number, direction: string): HTMLElement | null {
+export function getElementForPosition(dropTarget: HTMLElement, target: HTMLElement, x: number, y: number, direction: DrakeDirection): HTMLElement | null {
     let horizontal: boolean = direction === 'horizontal';
 
     // Choose method to determine child
