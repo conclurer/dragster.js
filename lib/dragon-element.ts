@@ -231,7 +231,7 @@ export class DragonElement {
 
         // todo apply class (.gu-transit) to dragged element (+ hook)
 
-        this.flyingItem = this.options.flyingElementProvider(this.item);
+        this.flyingItem = this.options.flyingElementProvider(this.elementToFly());
 
         // Send out cloned event
         this.emitter.next({
@@ -291,7 +291,13 @@ export class DragonElement {
         }
 
         // Cancel if dropZone is null
-        if (dropZone == null) return;
+        if (dropZone == null) {
+            if (this.shadowItem != null) {
+                this.shadowItem.parentNode.removeChild(this.shadowItem);
+                this.shadowItem = null;
+            }
+            return;
+        }
 
         // Check conditions for adding shadow to dropZone
         let dropZoneDidChangeAndHasNoSibling: boolean = (dropZone.nextSibling == null && dropTargetDidChange);
@@ -345,12 +351,16 @@ export class DragonElement {
         let immediate: HTMLElement | null = getImmediateChild(detectedDropZone, elementWithin);
 
         if (immediate != null) {
+            // If there is a child right below the element dragged, find position to add
             let reference: HTMLElement | null = getElementForPosition(detectedDropZone, immediate, mouseX, mouseY, this.options.direction);
 
             // Return dropZone
             return {container: detectedDropZone, nextSibling: reference};
         }
-        else return null;
+        else {
+            // If there is no child right below the element dragged, add at the end of the container
+            return {container: detectedDropZone, nextSibling: null};
+        }
     }
 
     /**
@@ -438,8 +448,8 @@ export class DragonElement {
         if (!this.isDragging()) return;
 
         // Remove this.item
-        let parent: HTMLElement = <HTMLElement>this.item.parentNode;
-        parent.removeChild(this.item);
+        let parent: HTMLElement | null = <HTMLElement>this.item.parentNode;
+        if (parent != null) parent.removeChild(this.item);
 
         // Emit remove event
         this.emitter.next({
@@ -536,16 +546,27 @@ export class DragonElement {
 
             // Detect immediate child element of target, cancel if it does not exist
             let immediate: HTMLElement | null = getImmediateChild(target, elementFlownOver);
-            if (immediate == null) return null;
 
-            let elementAtPosition: HTMLElement | null = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
+            if (immediate == null) {
+                // There is no child container right below the element dragged ~> add as last element
+                // An element should always be allowed to drop back to its origin
+                if (this.isInInitialPlacement(target, null)) break;
 
-            // An element should always be allowed to drop back to its origin
-            if (this.isInInitialPlacement(target, elementAtPosition)) break;
+                // Use options to detect if able to drop
+                if (this.options.accepts(this.item, target, this.originalContainer, null)) break;
+                else return null;
+            }
+            else {
+                // Child element below has been found
+                let elementAtPosition: HTMLElement | null = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
 
-            // Use options to detect if able to drop
-            if (this.options.accepts(this.item, target, this.originalContainer, elementAtPosition)) break;
+                // An element should always be allowed to drop back to its origin
+                if (this.isInInitialPlacement(target, elementAtPosition)) break;
 
+                // Use options to detect if able to drop
+                if (this.options.accepts(this.item, target, this.originalContainer, elementAtPosition)) break;
+                else return null;
+            }
         } while (target != null);
 
         return target;
@@ -558,6 +579,15 @@ export class DragonElement {
      */
     protected isContainer(item: HTMLElement): boolean {
         return this.dragster.isContainer(item);
+    }
+
+    /**
+     * Returns the item that will be passed over to the flying element provider
+     * Intended to be overwritten by subclasses
+     * @returns {HTMLElement}
+     */
+    protected elementToFly(): HTMLElement {
+        return this.item;
     }
 
     // Index Signature for DragonElement

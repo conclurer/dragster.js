@@ -12,6 +12,7 @@ import 'rxjs/add/observable/merge';
 import {getEventNames} from './helpers/mouse-event-functions';
 import {Subscription} from 'rxjs/Subscription';
 import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
+import {DragonCloneElement} from './dragon-clone-element';
 
 export class Dragster implements IDrake {
     // Instance variables
@@ -67,7 +68,14 @@ export class Dragster implements IDrake {
         if (context == null) return;
 
         // Configure Dragon
-        this.draggedElement = new DragonElement(context.item, this.options, this);
+        // Check if copy is required (will create clone)
+        if (this.requiresCopy(context.item, context.source)) {
+            this.draggedElement = new DragonCloneElement(context.item, this.options, this);
+        }
+        else {
+            this.draggedElement = new DragonElement(context.item, this.options, this);
+        }
+
         this.draggedElement.setOrigin(context.source, getNextSibling(context.item));
 
         // Subscribe to Dragon events
