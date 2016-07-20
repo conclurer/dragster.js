@@ -34,7 +34,9 @@ dragula([$('left-copy-1tomany'), $('right-copy-1tomany')], {
 
 dragula([sortable]);
 
-//crossvent.add(sortable, 'click', clickHandler);
+sortable.addEventListener('click', function (e) {
+    clickHandler(e);
+});
 
 function clickHandler(e) {
     var target = e.target;
