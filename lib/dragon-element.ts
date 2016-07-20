@@ -86,7 +86,6 @@ export class DragonElement {
 
         // Determine element to detect positioning
         if (sibling) sib = sibling;
-        // todo else if (this.dragon.hasMirror()) sib = this.dragon.currentSibling;
         else sib = this.originalSibling;
 
         return container === this.originalContainer && sib === this.originalSibling;
@@ -393,8 +392,6 @@ export class DragonElement {
         let overElement: HTMLElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
         let dropZone: HTMLElement | null = this.findDropTarget(overElement, mouseX, mouseY);
 
-        // todo: custom condition for copy drops
-        // todo: dropTarget && ((_copy && o.copySortSource) || (!_copy || dropTarget !== _source))
         if (dropZone != null) {
             this.drop(this.item, dropZone);
         }
