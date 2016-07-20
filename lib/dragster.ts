@@ -18,9 +18,6 @@ export class Dragster implements IDrake {
     // Currently dragged element
     protected draggedElement: DragonElement | null = null;
     protected draggedElementEventSubscription: Subscription | null = null;
-    // protected originalElement: HTMLElement = null;
-    // protected originalContainer: HTMLElement = null;
-    // protected originalSibling: HTMLElement = null;
 
     // Options
     protected options: IDragsterOptionsForced = new DragsterDefaultOptions();
@@ -85,7 +82,6 @@ export class Dragster implements IDrake {
                 case 'remove':
                 case 'cancel':
                 case 'drop':
-                    /** {@link DragsterDragEventHandler} */
                     this.emitter.next({channel: dragsterEvent.channel, data: dragsterEvent.data});
                     break;
 

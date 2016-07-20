@@ -124,7 +124,7 @@ export function isInput(givenElement: HTMLElement): boolean {
         if (element!.contentEditable === 'false') return false;
 
         // Go up one level
-        element = getParentElement(givenElement);
+        element = getParentElement(element);
 
     } while (element != null);
 
