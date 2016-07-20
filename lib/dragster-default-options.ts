@@ -1,6 +1,11 @@
-import {DrakeDirection, DragsterFlyingElementProvider} from './interfaces/dragster-options';
+import {
+    DrakeDirection,
+    DragsterFlyingElementProvider,
+    DragsterShadowElementProvider
+} from './interfaces/dragster-options';
 import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
 import {dragsterDefaultFlyingElementProvider} from './helpers/flying-element-provider';
+import {dragsterDefaultShadowElementProvider} from './helpers/shadow-element-provider';
 
 export class DragsterDefaultOptions implements IDragsterOptionsForced {
 
@@ -25,6 +30,8 @@ export class DragsterDefaultOptions implements IDragsterOptionsForced {
     }
 
     public flyingElementProvider: DragsterFlyingElementProvider = dragsterDefaultFlyingElementProvider;
+
+    public shadowElementProvider: DragsterShadowElementProvider = dragsterDefaultShadowElementProvider;
 
     // No element will be cloned by default
     public copy: boolean = false;

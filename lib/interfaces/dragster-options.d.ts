@@ -40,6 +40,13 @@ export interface IDragsterOptions {
     flyingElementProvider?: DragsterFlyingElementProvider;
 
     /**
+     * The item returned is the item that will be added at the position the user will drop the element currently dragged
+     * @param itemInMotion
+     * @param shadowContainer
+     */
+    shadowElementProvider?: DragsterShadowElementProvider;
+
+    /**
      * If true or returning true, the element dragged will be cloned on drop.
      * (See {@link DrakeCloneConfigurator})
      */
@@ -93,3 +100,10 @@ export type DrakeDirection = 'vertical' | 'horizontal';
  * @param originalElement
  */
 export type DragsterFlyingElementProvider = (originalElement?: HTMLElement) => HTMLElement;
+
+/**
+ * The item returned is the item that will be added at the position the user will drop the element currently dragged
+ * @param itemInMotion
+ * @param shadowContainer
+ */
+export type DragsterShadowElementProvider = (itemInMotion?: HTMLElement, shadowContainer?: HTMLElement) => HTMLElement;

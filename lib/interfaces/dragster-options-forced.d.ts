@@ -1,4 +1,10 @@
-import {IDragsterOptions, DrakeDirection, DrakeCloneConfigurator} from './dragster-options';
+import {
+    IDragsterOptions,
+    DrakeDirection,
+    DrakeCloneConfigurator,
+    DragsterFlyingElementProvider,
+    DragsterShadowElementProvider
+} from './dragster-options';
 
 /** See {@link IDragsterOptions} */
 export interface IDragsterOptionsForced extends IDragsterOptions {
@@ -6,7 +12,8 @@ export interface IDragsterOptionsForced extends IDragsterOptions {
     accepts(triggeringElement?: HTMLElement, targetContainer?: HTMLElement, sourceContainer?: HTMLElement, sibling?: HTMLElement | null): boolean;
     invalid(triggeringElement?: HTMLElement, handle?: HTMLElement): boolean;
     isContainer(container?: HTMLElement): boolean;
-    flyingElementProvider(originalElement?: HTMLElement): HTMLElement;
+    flyingElementProvider: DragsterFlyingElementProvider;
+    shadowElementProvider: DragsterShadowElementProvider;
     copy: (DrakeCloneConfigurator|boolean);
     copySortSource: boolean;
     revertOnSpill: boolean;

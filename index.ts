@@ -5,6 +5,7 @@ export * from './lib/interfaces/drake';
 export * from './lib/helpers/node-functions';
 export * from './lib/helpers/mouse-event-functions';
 export * from './lib/helpers/flying-element-provider';
+export * from './lib/helpers/shadow-element-provider';
 export * from './lib/dragula';
 export * from './lib/dragon-element';
 export * from './lib/dragster';

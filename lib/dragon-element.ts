@@ -5,12 +5,7 @@ import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
 import 'rxjs/add/operator/takeUntil';
 import {Subject} from 'rxjs/Subject';
-import {
-    IDragsterEvent,
-    IDragonItemCoordinates,
-    shadowElementProvider,
-    IDragonDropZone
-} from './interfaces/dragster-results';
+import {IDragsterEvent, IDragonItemCoordinates, IDragonDropZone} from './interfaces/dragster-results';
 import {
     getElementBehindPoint,
     getImmediateChild,
@@ -53,11 +48,6 @@ export class DragonElement {
     protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
 
     // Configuration
-    // Drop Target Locator
-    // todo: move to config
-    public shadowElementProvider: shadowElementProvider = DragonElement.defaultShadowElementProvider;
-
-    // Options for this
     protected options: IDragsterOptionsForced;
 
     // This is where this.item originally came from
@@ -325,7 +315,7 @@ export class DragonElement {
             }
 
             // Create new shadowItem
-            this.shadowItem = this.shadowElementProvider(this.item, dropZone.container);
+            this.shadowItem = this.options.shadowElementProvider(this.item, dropZone.container);
 
             // Insert shadowItem
             dropZone.container.insertBefore(this.shadowItem, dropZone.nextSibling);
@@ -568,16 +558,6 @@ export class DragonElement {
      */
     protected isContainer(item: HTMLElement): boolean {
         return this.dragster.isContainer(item);
-    }
-
-    /**
-     * Dragon's default provider for shadowElement. This will return the original source item directly.
-     * @param itemInMotion
-     * @param shadowContainer
-     * @returns {HTMLElement}
-     */
-    public static defaultShadowElementProvider(itemInMotion: HTMLElement, shadowContainer: HTMLElement): HTMLElement {
-        return itemInMotion;
     }
 
     // Index Signature for DragonElement
