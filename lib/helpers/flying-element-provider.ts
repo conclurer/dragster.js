@@ -12,6 +12,11 @@ export function dragsterDefaultFlyingElementProvider(originalElement: HTMLElemen
     mirror.style.height = `${rect.height}px`;
     mirror.style.top = `${rect.top}px`;
     mirror.style.left = `${rect.left}px`;
+
+    // Dragula .gu-mirror CSS class
+    mirror.style.position = 'fixed';
+    mirror.style.margin = '0';
+    mirror.style.zIndex = '9999';
     mirror.classList.add('gu-mirror');
     mirror.classList.remove('gu-transit');
     // todo: use options.mirrorContainer
