@@ -7,7 +7,7 @@ import {Dragster} from './dragster';
  * @param optionsOrNodes
  * @param options
  */
-export function dragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions), options?: IDragsterOptions): any;
+export function dragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions), options?: IDragsterOptions): Dragster;
 
 /**
  * Initializes a new Dragster instance
@@ -15,7 +15,7 @@ export function dragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions), optio
  * @param initialNodes
  * @param options
  */
-export function dragula(initialNodes: HTMLElement[], options?: IDragsterOptions): any {
+export function dragula(initialNodes: HTMLElement[], options?: IDragsterOptions): Dragster {
     let numArgs: number = arguments.length;
     if (numArgs === 1 && Array.isArray(initialNodes) === false) {
         // Only options is given, reset arguments
