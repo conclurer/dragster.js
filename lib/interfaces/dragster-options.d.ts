@@ -1,5 +1,9 @@
 export interface IDragsterOptions {
-    // todo: Property containers
+
+    /**
+     * All containers allowed for drag and drop operations
+     */
+    containers?: HTMLElement[];
 
     /**
      * Returns the state whether or not triggeringElement can be dragged.
@@ -85,7 +89,7 @@ export interface IDragsterOptions {
     ignoreInputTextSelection?: boolean;
 
     // Index signature
-    [key: string]: boolean | HTMLElement | string | undefined | Function;
+    [key: string]: boolean | HTMLElement | string | undefined | Function | HTMLElement[];
 }
 
 /**

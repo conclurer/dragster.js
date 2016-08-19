@@ -29,5 +29,10 @@ export function dragula(initialNodes: HTMLElement[], options?: IDragsterOptions)
         options = {};
     }
 
-    return new Dragster(options, ...initialNodes);
+    if (initialNodes == null) {
+        return new Dragster(options);
+    }
+    else {
+        return new Dragster(options, ...initialNodes);
+    }
 }

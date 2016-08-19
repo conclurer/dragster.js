@@ -52,6 +52,9 @@ export class DragsterDefaultOptions implements IDragsterOptionsForced {
     // By default, text selection is disallowed
     public ignoreInputTextSelection: boolean = true;
 
+    // By default no container is added
+    public containers: HTMLElement[] = [];
+
     // Index signature
-    [key: string]: boolean | HTMLElement | string | undefined | Function;
+    [key: string]: boolean | HTMLElement | HTMLElement[] | string | undefined | Function;
 }

@@ -24,7 +24,9 @@ export class Dragster implements IDrake {
     protected options: IDragsterOptionsForced = new DragsterDefaultOptions();
 
     // Watched containers
-    public containers: HTMLElement[] = [];
+    public get containers(): HTMLElement[] {
+        return this.options.containers;
+    }
 
     // Event Emitter
     protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
@@ -36,8 +38,8 @@ export class Dragster implements IDrake {
             this.options[key] = options[key];
         }
 
-        // Apply containers
-        this.containers = containers;
+        // Apply containers if given
+        this.options.containers = this.options.containers.concat(containers);
 
         // Setup events
         this.setupEvents();

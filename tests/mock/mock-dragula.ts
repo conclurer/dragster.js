@@ -29,5 +29,10 @@ export function mockDragula(initialNodes: HTMLElement[], options?: IDragsterOpti
         options = {};
     }
 
-    return new MockDragster(options, ...initialNodes);
+    if (initialNodes == null) {
+        return new MockDragster(options);
+    }
+    else {
+        return new MockDragster(options, ...initialNodes);
+    }
 }

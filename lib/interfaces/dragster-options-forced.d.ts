@@ -8,6 +8,7 @@ import {
 
 /** See {@link IDragsterOptions} */
 export interface IDragsterOptionsForced extends IDragsterOptions {
+    containers: HTMLElement[];
     moves(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, dragHandle?: HTMLElement, sibling?: HTMLElement | null): boolean;
     accepts(triggeringElement?: HTMLElement, targetContainer?: HTMLElement, sourceContainer?: HTMLElement, sibling?: HTMLElement | null): boolean;
     invalid(triggeringElement?: HTMLElement, handle?: HTMLElement): boolean;
