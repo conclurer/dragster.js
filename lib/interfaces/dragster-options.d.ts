@@ -46,6 +46,8 @@ export interface IDragsterOptions {
      */
     shadowElementProvider?: DragsterShadowElementProvider;
 
+    transitElementName?: string;
+
     /**
      * If true or returning true, the element dragged will be cloned on drop.
      * (See {@link DrakeCloneConfigurator})
@@ -107,3 +109,11 @@ export type DragsterFlyingElementProvider = (originalElement?: HTMLElement) => H
  * @param shadowContainer
  */
 export type DragsterShadowElementProvider = (itemInMotion?: HTMLElement, shadowContainer?: HTMLElement) => HTMLElement;
+
+/**
+ * Returns the CSS class to add to the transit element (mirrored from originalItem that came from originalContainer and is currently in currentContainer)
+ * @param originalItem
+ * @param originalContainer
+ * @param currentContainer
+ */
+export type DragsterTransitElementClassNameProvider = (originalItem?: HTMLElement, originalContainer?: HTMLElement, currentContainer?: HTMLElement) => string;

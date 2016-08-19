@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build:static": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js && webpack ./build/dragster-static.js ./dist/dragster.min.js --optimize-minimize",
-    "watch": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js --watch",
-    "postinstall": "typings install"
+    "watch": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js --watch"
   },
   "repository": {
     "type": "git",
@@ -19,10 +18,11 @@
   },
   "homepage": "https://github.com/conclurer/dragster.js#readme",
   "devDependencies": {
+    "@types/es6-shim": "0.0.29",
     "rxjs": "^5.0.0-beta.6",
+    "tape": "^4.6.0",
     "tslint": "^3.13.0",
     "typescript": "^2.0.0",
-    "typings": "^1.3.1",
     "webpack": "^1.13.1"
   },
   "peerDependencies": {
