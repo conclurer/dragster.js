@@ -2,9 +2,11 @@ import {Dragster} from '../../lib/dragster';
 import {MockDragonElement} from './mock-dragon-element';
 import {IDragsterEvent, IDragsterStartContext} from '../../lib/interfaces/dragster-results';
 import {getNextSibling} from '../../lib/helpers/node-functions';
+import {IDragsterOptionsForced} from '../../lib/interfaces/dragster-options-forced';
 
 export class MockDragster extends Dragster {
-    public draggedElement: MockDragonElement | null = null;
+    public draggedElement: MockDragonElement | null;
+    public options: IDragsterOptionsForced;
 
     protected triggerStart(context: IDragsterStartContext): void {
         // Configure Dragon
