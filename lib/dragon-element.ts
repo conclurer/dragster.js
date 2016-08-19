@@ -283,27 +283,36 @@ export class DragonElement {
 
         // Re-assign lastDropZone and trigger events
         if (dropTargetDidChange || dropZone == null) {
-            // Emit out event
-            if (this.lastDropTarget != null) {
-                this.emitter.next({
-                    channel: 'out',
-                    /** {@link DragsterOutEventHandler} */
-                    data: [this.item, this.lastDropTarget, this.originalContainer]
-                });
-            }
-
-            this.lastDropTarget = dropZone == null ? null : dropZone.container;
-
-            // Emit over event
-            if (this.lastDropTarget != null) {
-                this.emitter.next({
-                    channel: 'over',
-                    /** {@link DragsterOverEventHandler} */
-                    data: [this.item, this.lastDropTarget, this.originalContainer]
-                });
-            }
+            this.changeLastDropZone(dropZone);
         }
 
+        // Move shadow element
+        this.moveShadow(dropZone, dropTargetDidChange);
+    }
+
+    protected changeLastDropZone(dropZone: IDragonDropZone | null): void {
+        // Emit out event
+        if (this.lastDropTarget != null) {
+            this.emitter.next({
+                channel: 'out',
+                /** {@link DragsterOutEventHandler} */
+                data: [this.item, this.lastDropTarget, this.originalContainer]
+            });
+        }
+
+        this.lastDropTarget = dropZone == null ? null : dropZone.container;
+
+        // Emit over event
+        if (this.lastDropTarget != null) {
+            this.emitter.next({
+                channel: 'over',
+                /** {@link DragsterOverEventHandler} */
+                data: [this.item, this.lastDropTarget, this.originalContainer]
+            });
+        }
+    }
+
+    protected moveShadow(dropZone: IDragonDropZone | null, dropTargetDidChange: boolean): void {
         // Cancel if dropZone is null
         if (dropZone == null) {
             if (this.shadowItem != null) {
