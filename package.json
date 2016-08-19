@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build:static": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js && webpack ./build/dragster-static.js ./dist/dragster.min.js --optimize-minimize",
-    "watch": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js --watch"
+    "watch": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js --watch",
+    "test": "tsc && browserify tests/*.spec.js | tape-run"
   },
   "repository": {
     "type": "git",
@@ -19,13 +20,16 @@
   "homepage": "https://github.com/conclurer/dragster.js#readme",
   "devDependencies": {
     "@types/es6-shim": "0.0.29",
-    "rxjs": "^5.0.0-beta.6",
+    "@types/tape": "^4.2.27",
+    "browserify": "^13.1.0",
+    "rxjs": "5.0.0-beta.6",
     "tape": "^4.6.0",
+    "tape-run": "^2.1.4",
     "tslint": "^3.13.0",
     "typescript": "^2.0.0",
     "webpack": "^1.13.1"
   },
   "peerDependencies": {
-    "rxjs": "^5.0.0-beta.6"
+    "rxjs": "5.0.0-beta.6"
   }
 }

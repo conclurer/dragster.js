@@ -53,7 +53,14 @@ export class Dragster implements IDrake {
         let context: IDragsterStartContext | null = this.startContext(item);
         if (context == null) return;
 
-        // todo: manual start
+        // Trigger Start
+        this.triggerStart(context);
+
+        // Cancel if start failed
+        if (this.draggedElement == null) return;
+
+        // Start forceStart operation
+        this.draggedElement.forceStart();
     }
 
     /**
@@ -67,6 +74,25 @@ export class Dragster implements IDrake {
         let context: IDragsterStartContext | null = this.startContext(<HTMLElement>event.target);
         if (context == null) return;
 
+        // Trigger Start
+        this.triggerStart(context);
+
+        // Cancel if start failed
+        if (this.draggedElement == null) return;
+
+        // Start drag operation
+        this.draggedElement.grab(event);
+
+        // If triggering element is an inputfield element, focus it - else: cancel default
+        if (event.type === 'mousedown') {
+            let triggeringElement: HTMLElement = <HTMLElement>event.target;
+
+            if (isInput(triggeringElement)) triggeringElement.focus();
+            else event.preventDefault();
+        }
+    }
+
+    protected triggerStart(context: IDragsterStartContext): void {
         // Configure Dragon
         // Check if copy is required (will create clone)
         if (this.requiresCopy(context.item, context.source)) {
@@ -106,17 +132,6 @@ export class Dragster implements IDrake {
                     break;
             }
         });
-
-        // Start drag operation
-        this.draggedElement.grab(event);
-
-        // If triggering element is an inputfield element, focus it - else: cancel default
-        if (event.type === 'mousedown') {
-            let triggeringElement: HTMLElement = <HTMLElement>event.target;
-
-            if (isInput(triggeringElement)) triggeringElement.focus();
-            else event.preventDefault();
-        }
     }
 
     /**
@@ -128,9 +143,12 @@ export class Dragster implements IDrake {
         // todo this.drop(this.dragon.draggedItem);
     }
 
-    public cancel(revert?: boolean): void {
-        return;
-        // todo
+    public cancel(revert: boolean = false): void {
+        // Cancel operation if this.draggedElement is null
+        if (this.draggedElement == null) return;
+
+        this.draggedElement.cancel(revert);
+        // this.cleanup();
     }
 
     public remove(): void {

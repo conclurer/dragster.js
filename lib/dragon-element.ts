@@ -40,7 +40,7 @@ export class DragonElement {
 
     // Item Move Stream
     protected itemMoveStream: Subscription;
-    protected mouseCoordinatesOnStart: IDragonItemCoordinates;
+    protected mouseCoordinatesOnStart: IDragonItemCoordinates | null;
     protected lastDropTarget: HTMLElement | null = null;
     protected currentSibling: HTMLElement | null;
 
@@ -103,6 +103,13 @@ export class DragonElement {
         this.mouseCoordinatesOnStart = {x: e.clientX, y: e.clientY};
 
         // Setup stream
+        this.setupStream();
+    }
+
+    /**
+     * Forces starts dragging this.item.
+     */
+    public forceStart(): void {
         this.setupStream();
     }
 
@@ -182,6 +189,14 @@ export class DragonElement {
 
                     // Prevent default behavior
                     itemMovedEvent.preventDefault();
+
+                    // Set mouseCoordinatesOnStart if not present
+                    if (this.mouseCoordinatesOnStart == null) {
+                        this.mouseCoordinatesOnStart = {
+                            x: clientX,
+                            y: clientY
+                        };
+                    }
 
                     // Detect and apply coordinate changes
                     // elementInner: Coordinates of the element including offset of curser to element borders
@@ -433,7 +448,7 @@ export class DragonElement {
             this.emitter.next({
                 channel: 'drop',
                 /** {@link DragsterDropEventHandler} */
-                data: [item, target, this.currentSibling]
+                data: [item, target, this.originalContainer, this.currentSibling]
             });
         }
 
@@ -479,7 +494,7 @@ export class DragonElement {
             this.emitter.next({
                 channel: 'cancel',
                 /** {@link DragsterCancelEventHandler} */
-                data: [this.item, this.lastDropTarget, this.originalContainer]
+                data: [this.item, this.originalContainer, this.originalContainer]
             });
         }
         else {
@@ -487,7 +502,7 @@ export class DragonElement {
             this.emitter.next({
                 channel: 'drop',
                 /** {@link DragsterDropEventHandler} */
-                data: [this.item, this.lastDropTarget, this.currentSibling]
+                data: [this.item, this.lastDropTarget, this.originalContainer, this.currentSibling]
             });
         }
 
