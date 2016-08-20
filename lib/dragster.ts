@@ -145,6 +145,10 @@ export class Dragster implements IDrake {
         // todo this.drop(this.dragon.draggedItem);
     }
 
+    /**
+     * Cancel the current drag event
+     * @param revert
+     */
     public cancel(revert: boolean = false): void {
         // Cancel operation if this.draggedElement is null
         if (this.draggedElement == null) return;
