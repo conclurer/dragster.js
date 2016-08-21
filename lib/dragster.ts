@@ -1,18 +1,18 @@
-import {IDragsterOptions, DrakeCloneConfigurator} from './interfaces/dragster-options';
-import {DragsterDefaultOptions} from './dragster-default-options';
-import {IDrake} from './interfaces/drake';
-import {IDragsterStartContext, IDragsterEvent} from './interfaces/dragster-results';
-import {getParentElement, getNextSibling, isInput} from './helpers/node-functions';
-import {Subject} from 'rxjs/Subject';
-import 'rxjs/add/operator/filter';
-import {DragonElement} from './dragon-element';
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
-import {getEventNames} from './helpers/mouse-event-functions';
-import {Subscription} from 'rxjs/Subscription';
-import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
-import {DragonCloneElement} from './dragon-clone-element';
+import {IDragsterOptions, DrakeCloneConfigurator} from "./interfaces/dragster-options";
+import {DragsterDefaultOptions} from "./dragster-default-options";
+import {IDrake} from "./interfaces/drake";
+import {IDragsterStartContext, IDragsterEvent} from "./interfaces/dragster-results";
+import {getParentElement, getNextSibling, isInput} from "./helpers/node-functions";
+import {Subject} from "rxjs/Subject";
+import "rxjs/add/operator/filter";
+import {DragonElement} from "./dragon-element";
+import {Observable} from "rxjs/Observable";
+import "rxjs/add/observable/fromEvent";
+import "rxjs/add/observable/merge";
+import {getEventNames} from "./helpers/mouse-event-functions";
+import {Subscription} from "rxjs/Subscription";
+import {IDragsterOptionsForced} from "./interfaces/dragster-options-forced";
+import {DragonCloneElement} from "./dragon-clone-element";
 
 export class Dragster implements IDrake {
     // Instance variables
@@ -154,7 +154,7 @@ export class Dragster implements IDrake {
         if (this.draggedElement == null) return;
 
         this.draggedElement.cancel(revert);
-        // this.cleanup();
+        this.cleanup();
     }
 
     public remove(): void {
@@ -184,8 +184,18 @@ export class Dragster implements IDrake {
     }
 
     public destroy(): void {
-        // todo
-        return;
+        // Cancel if there is no dragged element
+        if (this.draggedElement == null) return;
+
+        // Check if revertOnSpill is given
+        if (this.options.revertOnSpill) {
+            // Revert drag operation, restore original position
+            this.draggedElement.cancel(true);
+        }
+        else {
+            // Drop immediately to next target
+            this.draggedElement.forceRelease();
+        }
     }
 
     protected cleanup(): void {

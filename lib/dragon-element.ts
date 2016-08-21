@@ -1,11 +1,11 @@
-import {whichMouseButton, getEventNames} from './helpers/mouse-event-functions';
-import {Subscription} from 'rxjs/Subscription';
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
-import 'rxjs/add/operator/takeUntil';
-import {Subject} from 'rxjs/Subject';
-import {IDragsterEvent, IDragonItemCoordinates, IDragonDropZone} from './interfaces/dragster-results';
+import {whichMouseButton, getEventNames} from "./helpers/mouse-event-functions";
+import {Subscription} from "rxjs/Subscription";
+import {Observable} from "rxjs/Observable";
+import "rxjs/add/observable/fromEvent";
+import "rxjs/add/observable/merge";
+import "rxjs/add/operator/takeUntil";
+import {Subject} from "rxjs/Subject";
+import {IDragsterEvent, IDragonItemCoordinates, IDragonDropZone} from "./interfaces/dragster-results";
 import {
     getElementBehindPoint,
     getImmediateChild,
@@ -13,9 +13,9 @@ import {
     getNextSibling,
     isInput,
     getParentElement
-} from './helpers/node-functions';
-import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
-import {Dragster} from './dragster';
+} from "./helpers/node-functions";
+import {IDragsterOptionsForced} from "./interfaces/dragster-options-forced";
+import {Dragster} from "./dragster";
 
 /**
  * DragonElement
@@ -41,6 +41,7 @@ export class DragonElement {
     // Item Move Stream
     protected itemMoveStream: Subscription;
     protected mouseCoordinatesOnStart: IDragonItemCoordinates | null;
+    protected currentMouseCoordinates: IDragonItemCoordinates | null;
     protected lastDropTarget: HTMLElement | null = null;
     protected currentSibling: HTMLElement | null;
 
@@ -113,6 +114,11 @@ export class DragonElement {
         this.setupStream();
     }
 
+    public forceRelease(): void {
+        if (this.currentMouseCoordinates == null) return;
+        this.release(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
+    }
+
     /**
      * Returns true if this.item is currently being dragged.
      * @returns {boolean}
@@ -149,10 +155,6 @@ export class DragonElement {
             return Observable.fromEvent(document.documentElement, eventName);
         });
 
-        // latest coordinates of user
-        let clientX: number;
-        let clientY: number;
-
         // Subscribe to user's mouse move events
         this.itemMoveStream = Observable.merge(...moveEvents)
         // Cancel when the user stops to
@@ -164,22 +166,24 @@ export class DragonElement {
                     if (this.isCancelled()) return;
 
                     // Save mouse coordinates
-                    clientX = itemMovedEvent.clientX;
-                    clientY = itemMovedEvent.clientY;
+                    this.currentMouseCoordinates = {
+                        x: itemMovedEvent.clientX,
+                        y: itemMovedEvent.clientY
+                    };
 
                     // Cancel dragging if wrong mouse button is pressed
                     // Only possibility to detect mouse up in Inputfields
                     if (whichMouseButton(itemMovedEvent) === 0) {
-                        this.release(clientX, clientY);
+                        this.release(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                         return;
                     }
 
                     // Text selection inside an Input-like HTMLElement
                     // If Dragster is configured to ignoreInputTextSelection, cancel event
                     if (this.options.ignoreInputTextSelection && !this.isDragging()) {
-                        let elementBehindCursor: HTMLElement = <HTMLElement>document.elementFromPoint(clientX, clientY);
+                        let elementBehindCursor: HTMLElement = <HTMLElement>document.elementFromPoint(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                         if (isInput(elementBehindCursor)) {
-                            this.release(clientX, clientY);
+                            this.release(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                             return;
                         }
                     }
@@ -193,8 +197,8 @@ export class DragonElement {
                     // Set mouseCoordinatesOnStart if not present
                     if (this.mouseCoordinatesOnStart == null) {
                         this.mouseCoordinatesOnStart = {
-                            x: clientX,
-                            y: clientY
+                            x: this.currentMouseCoordinates.x,
+                            y: this.currentMouseCoordinates.y
                         };
                     }
 
@@ -204,8 +208,8 @@ export class DragonElement {
                     let elementInnerY: number = this.itemOriginalCoordinates.y + (this.mouseCoordinatesOnStart.y - this.itemOriginalCoordinates.y);
 
                     // Calculate total x/y position
-                    let x: number = clientX - elementInnerX;
-                    let y: number = clientY - elementInnerY;
+                    let x: number = this.currentMouseCoordinates.x - elementInnerX;
+                    let y: number = this.currentMouseCoordinates.y - elementInnerY;
 
                     // Cancel if there is no flying item
                     if (this.flyingItem == null) return;
@@ -220,7 +224,10 @@ export class DragonElement {
 
                 // Executed when the user stops to drag one element
                 () => {
-                    this.release(clientX, clientY);
+                    // Cancel if there are no current mouse coordinates
+                    if (this.currentMouseCoordinates == null) return;
+
+                    this.release(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                 }
             );
     }

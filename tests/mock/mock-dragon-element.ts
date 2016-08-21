@@ -1,5 +1,5 @@
-import {DragonElement} from '../../lib/dragon-element';
-import {IDragonDropZone} from '../../lib/interfaces/dragster-results';
+import {DragonElement} from "../../lib/dragon-element";
+import {IDragonDropZone} from "../../lib/interfaces/dragster-results";
 
 export class MockDragonElement extends DragonElement {
     protected setupStream(): void {
@@ -9,6 +9,37 @@ export class MockDragonElement extends DragonElement {
 
     public mockMove(element: HTMLElement, sibling: HTMLElement | null = null): void {
         this.mockDetectDropZone(element, sibling);
+    }
+
+    public forceRelease(): void {
+        // overwrite: this.release
+        // Cancel if not dragging
+        if (!this.isDragging()) {
+            // Emit cancelBeforeDragging event to inform Dragster
+            this.emitter.next({channel: 'cancelBeforeDragging', data: []});
+            return;
+        }
+
+        // Cancel if there is no flyingElement
+        if (this.flyingItem == null) return;
+
+        // Detect drop zone (mocked to this.latestDropTarget)
+        let dropZone = this.lastDropTarget;
+
+        if (dropZone != null) {
+            this.drop(this.item, dropZone);
+        }
+        else if (this.options.removeOnSpill) {
+            this.remove();
+        }
+        else {
+            this.cancel();
+        }
+
+        // Set instance variables
+        // Cancel drag events
+        this.dragging = false;
+        this.cancelled = true;
     }
 
     protected mockDetectDropZone(element: HTMLElement, sibling: HTMLElement | null): void {

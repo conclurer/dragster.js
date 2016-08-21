@@ -1,7 +1,7 @@
 import test = require('tape');
 import Test = test.Test;
-import {mockDragula} from './mock/mock-dragula';
-import {MockDragster} from './mock/mock-dragster';
+import {mockDragula} from "./mock/mock-dragula";
+import {MockDragster} from "./mock/mock-dragster";
 
 test('destroy does not throw when not dragging, destroyed, or whatever', (t: Test) => {
     t.test('a single time', (st: Test) => {
@@ -73,7 +73,7 @@ test('when dragging a copy and destroy gets called, default does not revert', (t
 
     // Execute test
     drake.start(item);
-    div2.appendChild(item);
+    if (drake.draggedElement != null) drake.draggedElement.mockMove(div2);
     drake.destroy();
     t.plan(4);
     t.end();
@@ -97,7 +97,7 @@ test('when dragging a copy and destroy gets called, revert is executed', (t: Tes
 
     // Execute test
     drake.start(item);
-    div2.appendChild(item);
+    if (drake.draggedElement != null) drake.draggedElement.mockMove(div2);
     drake.destroy();
     t.plan(3);
     t.end();
