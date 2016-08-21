@@ -6,7 +6,8 @@
   "scripts": {
     "build:static": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js && webpack ./build/dragster-static.js ./dist/dragster.min.js --optimize-minimize",
     "watch": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js --watch",
-    "test": "tsc && browserify tests/*.spec.js | tape-run"
+    "test": "tsc && browserify tests/*.spec.js | tape-run",
+    "lint": "tslint **/*.ts !**/*.d.ts"
   },
   "repository": {
     "type": "git",

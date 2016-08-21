@@ -1,5 +1,5 @@
-import {DragonElement} from "../../lib/dragon-element";
-import {IDragonDropZone} from "../../lib/interfaces/dragster-results";
+import {DragonElement} from '../../lib/dragon-element';
+import {IDragonDropZone} from '../../lib/interfaces/dragster-results';
 
 export class MockDragonElement extends DragonElement {
     protected setupStream(): void {

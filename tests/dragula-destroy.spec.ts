@@ -1,7 +1,7 @@
 import test = require('tape');
 import Test = test.Test;
-import {mockDragula} from "./mock/mock-dragula";
-import {MockDragster} from "./mock/mock-dragster";
+import {mockDragula} from './mock/mock-dragula';
+import {MockDragster} from './mock/mock-dragster';
 
 test('destroy does not throw when not dragging, destroyed, or whatever', (t: Test) => {
     t.test('a single time', (st: Test) => {

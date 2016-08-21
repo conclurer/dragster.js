@@ -1,11 +1,11 @@
-import {whichMouseButton, getEventNames} from "./helpers/mouse-event-functions";
-import {Subscription} from "rxjs/Subscription";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/observable/fromEvent";
-import "rxjs/add/observable/merge";
-import "rxjs/add/operator/takeUntil";
-import {Subject} from "rxjs/Subject";
-import {IDragsterEvent, IDragonItemCoordinates, IDragonDropZone} from "./interfaces/dragster-results";
+import {whichMouseButton, getEventNames} from './helpers/mouse-event-functions';
+import {Subscription} from 'rxjs/Subscription';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/takeUntil';
+import {Subject} from 'rxjs/Subject';
+import {IDragsterEvent, IDragonItemCoordinates, IDragonDropZone} from './interfaces/dragster-results';
 import {
     getElementBehindPoint,
     getImmediateChild,
@@ -13,9 +13,9 @@ import {
     getNextSibling,
     isInput,
     getParentElement
-} from "./helpers/node-functions";
-import {IDragsterOptionsForced} from "./interfaces/dragster-options-forced";
-import {Dragster} from "./dragster";
+} from './helpers/node-functions';
+import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
+import {Dragster} from './dragster';
 
 /**
  * DragonElement
