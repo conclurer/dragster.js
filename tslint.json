@@ -1,3 +1,6 @@
+// 20170105225917
+// https://raw.githubusercontent.com/conclurer/edelog/develop/angular-modules/tslint.json?token=AFpI5wnEQHY_-Nn0kLNUHAEtXEvzkrXDks5Yd_w1wA%3D%3D
+
 {
   "rules": {
     "align": [
@@ -48,7 +51,10 @@
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
-    "no-inferrable-types": false,
+    "no-inferrable-types": [
+      true,
+      "ignore-params"
+    ],
     "no-internal-module": true,
     "no-require-imports": false,
     "no-shadowed-variable": true,
@@ -94,7 +100,6 @@
       "call-signature",
       "parameter",
       "property-declaration",
-      "variable-declaration",
       "member-variable-declaration"
     ],
     "typedef-whitespace": [

@@ -20,17 +20,17 @@
   },
   "homepage": "https://github.com/conclurer/dragster.js#readme",
   "devDependencies": {
-    "@types/es6-shim": "0.0.29",
+    "@types/es6-shim": "^0.0.29",
     "@types/tape": "^4.2.27",
     "browserify": "^13.1.0",
-    "rxjs": "5.0.0-beta.6",
+    "rxjs": "^5.0.0",
     "tape": "^4.6.0",
     "tape-run": "^2.1.4",
     "tslint": "^3.13.0",
     "typescript": "^2.0.0",
-    "webpack": "^1.13.1"
+    "webpack": "^2.1.0-beta.27"
   },
   "peerDependencies": {
-    "rxjs": "5.0.0-beta.6"
+    "rxjs": "^5.0.0"
   }
 }
