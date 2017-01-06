@@ -1,6 +1,8 @@
 var sortable = $('sortable');
 
+// First Demo
 dragula([$('left-defaults'), $('right-defaults')]);
+
 dragula([$('left-copy'), $('right-copy')], {copy: true});
 dragula([$('left-events'), $('right-events')])
     .on('drag', function (el) {
