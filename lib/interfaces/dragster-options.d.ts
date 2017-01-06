@@ -12,7 +12,7 @@ export interface IDragsterOptions {
      * @param dragHandle
      * @param sibling
      */
-    moves?(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, dragHandle?: HTMLElement, sibling?: HTMLElement | null): boolean;
+    moves?(triggeringElement: HTMLElement, sourceContainer: HTMLElement, dragHandle: HTMLElement, sibling: HTMLElement | null): boolean;
 
     /**
      * If true, triggeringElement from sourceContainer can be moved into targetContainer
@@ -21,42 +21,42 @@ export interface IDragsterOptions {
      * @param sourceContainer
      * @param sibling
      */
-    accepts?(triggeringElement?: HTMLElement, targetContainer?: HTMLElement, sourceContainer?: HTMLElement, sibling?: HTMLElement | null): boolean;
+    accepts?(triggeringElement: HTMLElement, targetContainer: HTMLElement, sourceContainer: HTMLElement, sibling: HTMLElement | null): boolean;
 
     /**
      * If true, triggeringElement cannot be dragged
      * @param triggeringElement
      * @param handle
      */
-    invalid?(triggeringElement?: HTMLElement, handle?: HTMLElement): boolean;
+    invalid?(triggeringElement: HTMLElement, handle: HTMLElement): boolean;
 
     /**
      * If true, container is a valid container besides otherwise specified containers
      * (See {@link Dragster})
      * @param container
      */
-    isContainer?(container?: HTMLElement): boolean;
+    isContainer?(container: HTMLElement): boolean;
 
     /**
      * The item returned is the flying element dragged while the user presses down their mouse button
      * @param originalElement
      */
-    flyingElementProvider?: DragsterFlyingElementProvider;
+    flyingElementProvider?: DragsterFlyingElementProviderSignature;
 
     /**
      * The item returned is the item that will be added at the position the user will drop the element currently dragged
      * @param itemInMotion
      * @param shadowContainer
      */
-    shadowElementProvider?: DragsterShadowElementProvider;
+    shadowElementProvider?: DragsterShadowElementProviderSignature;
 
     transitElementName?: string;
 
     /**
      * If true or returning true, the element dragged will be cloned on drop.
-     * (See {@link DrakeCloneConfigurator})
+     * (See {@link DrakeCloneConfiguratorSignature})
      */
-    copy?: (DrakeCloneConfigurator|boolean);
+    copy?: (DrakeCloneConfiguratorSignature|boolean);
 
     /**
      * If copy is true and copySortSource is true, users will be able to sort elements of the sourceContainer
@@ -76,7 +76,7 @@ export interface IDragsterOptions {
     /**
      * Determines the axis that is considered when placing the dropped element inside the DOM
      */
-    direction?: DrakeDirection;
+    direction?: drakeDirection;
 
     /**
      * The container in which the mirrored element will be displayed.
@@ -97,22 +97,28 @@ export interface IDragsterOptions {
  * @param triggeringElement
  * @param sourceContainer
  */
-export type DrakeCloneConfigurator = (triggeringElement?: HTMLElement, sourceContainer?: HTMLElement) => boolean;
+export interface DrakeCloneConfiguratorSignature {
+    (triggeringElement: HTMLElement, sourceContainer: HTMLElement): boolean;
+}
 
-export type DrakeDirection = 'vertical' | 'horizontal';
+export type drakeDirection = 'vertical' | 'horizontal';
 
 /**
  * The item returned is the flying element dragged while the user presses down their mouse button
  * @param originalElement
  */
-export type DragsterFlyingElementProvider = (originalElement?: HTMLElement) => HTMLElement;
+export interface DragsterFlyingElementProviderSignature {
+    (originalElement: HTMLElement): HTMLElement;
+}
 
 /**
  * The item returned is the item that will be added at the position the user will drop the element currently dragged
  * @param itemInMotion
  * @param shadowContainer
  */
-export type DragsterShadowElementProvider = (itemInMotion?: HTMLElement, shadowContainer?: HTMLElement) => HTMLElement;
+export interface DragsterShadowElementProviderSignature {
+    (itemInMotion: HTMLElement, shadowContainer: HTMLElement): HTMLElement;
+}
 
 /**
  * Returns the CSS class to add to the transit element (mirrored from originalItem that came from originalContainer and is currently in currentContainer)
@@ -120,4 +126,6 @@ export type DragsterShadowElementProvider = (itemInMotion?: HTMLElement, shadowC
  * @param originalContainer
  * @param currentContainer
  */
-export type DragsterTransitElementClassNameProvider = (originalItem?: HTMLElement, originalContainer?: HTMLElement, currentContainer?: HTMLElement) => string;
+export interface DragsterTransitElementClassNameProviderSignature {
+    (originalItem: HTMLElement, originalContainer: HTMLElement, currentContainer: HTMLElement): string;
+}

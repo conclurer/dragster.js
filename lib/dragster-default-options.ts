@@ -1,7 +1,7 @@
 import {
-    DrakeDirection,
-    DragsterFlyingElementProvider,
-    DragsterShadowElementProvider
+    drakeDirection,
+    DragsterFlyingElementProviderSignature,
+    DragsterShadowElementProviderSignature
 } from './interfaces/dragster-options';
 import {IDragsterOptionsForced} from './interfaces/dragster-options-forced';
 import {dragsterDefaultFlyingElementProvider} from './helpers/flying-element-provider';
@@ -29,9 +29,9 @@ export class DragsterDefaultOptions implements IDragsterOptionsForced {
         return false;
     }
 
-    public flyingElementProvider: DragsterFlyingElementProvider = dragsterDefaultFlyingElementProvider;
+    public flyingElementProvider: DragsterFlyingElementProviderSignature = dragsterDefaultFlyingElementProvider;
 
-    public shadowElementProvider: DragsterShadowElementProvider = dragsterDefaultShadowElementProvider;
+    public shadowElementProvider: DragsterShadowElementProviderSignature = dragsterDefaultShadowElementProvider;
 
     // No element will be cloned by default
     public copy: boolean = false;
@@ -44,7 +44,7 @@ export class DragsterDefaultOptions implements IDragsterOptionsForced {
     public removeOnSpill: boolean = false;
 
     // By default, the Y axis is considered
-    public direction: DrakeDirection = 'vertical';
+    public direction: drakeDirection = 'vertical';
 
     // By default, mirrored images are applied to body
     public mirrorContainer: HTMLElement = document.body;

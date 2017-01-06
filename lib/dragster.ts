@@ -1,7 +1,19 @@
-import {IDragsterOptions, DrakeCloneConfigurator} from './interfaces/dragster-options';
+import {IDragsterOptions, DrakeCloneConfiguratorSignature} from './interfaces/dragster-options';
 import {DragsterDefaultOptions} from './dragster-default-options';
 import {IDrake} from './interfaces/drake';
-import {IDragsterStartContext, IDragsterEvent} from './interfaces/dragster-results';
+import {
+    IDragsterStartContext,
+    IDragsterEvent,
+    DragsterDragEventHandlerSignature,
+    DragsterDragEndEventHandlerSignature,
+    DragsterClonedEventHandlerSignature,
+    DragsterCancelEventHandlerSignature,
+    DragsterDropEventHandlerSignature,
+    DragsterOutEventHandlerSignature,
+    DragsterOverEventHandlerSignature,
+    DragsterShadowEventHandlerSignature,
+    DragsterRemoveEventHandlerSignature
+} from './interfaces/dragster-results';
 import {getParentElement, getNextSibling, isInput} from './helpers/node-functions';
 import {Subject} from 'rxjs/Subject';
 import 'rxjs/add/operator/filter';
@@ -52,7 +64,7 @@ export class Dragster implements IDrake {
      * @param item
      */
     public start(item: HTMLElement): void {
-        let context: IDragsterStartContext | null = this.startContext(item);
+        let context = this.startContext(item);
         if (context == null) return;
 
         // Trigger Start
@@ -73,7 +85,7 @@ export class Dragster implements IDrake {
         // Cancel if there is an element already being dragged
         if (this.draggedElement != null) return;
 
-        let context: IDragsterStartContext | null = this.startContext(<HTMLElement>event.target);
+        let context = this.startContext(<HTMLElement>event.target);
         if (context == null) return;
 
         // Trigger Start
@@ -83,11 +95,11 @@ export class Dragster implements IDrake {
         if (this.draggedElement == null) return;
 
         // Start drag operation
-        this.draggedElement.grab(event);
+        (<DragonElement>this.draggedElement).grab(event);
 
         // If triggering element is an inputfield element, focus it - else: cancel default
         if (event.type === 'mousedown') {
-            let triggeringElement: HTMLElement = <HTMLElement>event.target;
+            let triggeringElement = <HTMLElement>event.target;
 
             if (isInput(triggeringElement)) triggeringElement.focus();
             else event.preventDefault();
@@ -107,7 +119,7 @@ export class Dragster implements IDrake {
         this.draggedElement.setOrigin(context.source, getNextSibling(context.item));
 
         // Subscribe to Dragon events
-        this.draggedElementEventSubscription = this.draggedElement.events().subscribe((dragsterEvent: IDragsterEvent) => {
+        this.draggedElementEventSubscription = this.draggedElement.events$.subscribe((dragsterEvent: IDragsterEvent) => {
             switch (dragsterEvent.channel) {
                 // Drag Event
                 case 'drag':
@@ -126,7 +138,7 @@ export class Dragster implements IDrake {
                     break;
 
                 case 'dragend':
-                    /** {@link DragsterDragEndEventHandler} */
+                    /** {@link DragsterDragEndEventHandlerSignature} */
                     this.emitter.next({channel: dragsterEvent.channel, data: dragsterEvent.data});
 
                     // Cleanup this
@@ -140,9 +152,8 @@ export class Dragster implements IDrake {
      * Stops dragging the currently dragged item
      */
     public end(): void {
-        if (!this.dragging) return;
-
-        // todo this.drop(this.dragon.draggedItem);
+        if (!this.dragging || this.draggedElement == null) return;
+        this.draggedElement.forceRelease();
     }
 
     /**
@@ -162,6 +173,16 @@ export class Dragster implements IDrake {
         // todo
     }
 
+    public on(events: 'drag', callback: DragsterDragEventHandlerSignature): Dragster;
+    public on(events: 'dragend', callback: DragsterDragEndEventHandlerSignature): Dragster;
+    public on(events: 'cloned', callback: DragsterClonedEventHandlerSignature): Dragster;
+    public on(events: 'cancel', callback: DragsterCancelEventHandlerSignature): Dragster;
+    public on(events: 'drop', callback: DragsterDropEventHandlerSignature): Dragster;
+    public on(events: 'out', callback: DragsterOutEventHandlerSignature): Dragster;
+    public on(events: 'over', callback: DragsterOverEventHandlerSignature): Dragster;
+    public on(events: 'shadow', callback: DragsterShadowEventHandlerSignature): Dragster;
+    public on(events: 'remove', callback: DragsterRemoveEventHandlerSignature): Dragster;
+
     /**
      * Subscribes callback to any events for the requested channel
      * @param event
@@ -179,7 +200,7 @@ export class Dragster implements IDrake {
      * Returns a stream of all events of this Dragster instance
      * @returns {Observable<IDragsterEvent>}
      */
-    public events(): Observable<IDragsterEvent> {
+    public get events$(): Observable<IDragsterEvent> {
         return this.emitter.asObservable();
     }
 
@@ -200,7 +221,7 @@ export class Dragster implements IDrake {
 
     protected cleanup(): void {
         // Unsubscribe and remove draggedElement
-        if (this.draggedElementEventSubscription != null && !this.draggedElementEventSubscription.isUnsubscribed) {
+        if (this.draggedElementEventSubscription != null) {
             this.draggedElementEventSubscription.unsubscribe();
         }
 
@@ -222,7 +243,7 @@ export class Dragster implements IDrake {
         if (this.isContainer(item)) return null;
 
         // Detect element to drag
-        let dragHandle: HTMLElement = item;
+        let dragHandle = item;
         let parent: HTMLElement | null;
         do {
             parent = getParentElement(item);
@@ -241,8 +262,11 @@ export class Dragster implements IDrake {
             if (item == null) return null;
         } while (true);
 
+        // Check if the selected element is marked as invalid
+        if (this.options.invalid(item, dragHandle)) return null;
+
         // Check if resulting item and parent are movable
-        let sibling: HTMLElement | null = getNextSibling(item);
+        let sibling = getNextSibling(item);
         if (!this.options.moves(item, parent, dragHandle, sibling)) return null;
 
         return {item: item, source: parent};
@@ -267,7 +291,7 @@ export class Dragster implements IDrake {
             return <boolean>this.options.copy;
         }
         else {
-            return (<DrakeCloneConfigurator>this.options.copy)(triggeringItem, sourceContainer);
+            return (<DrakeCloneConfiguratorSignature>this.options.copy)(triggeringItem, sourceContainer);
         }
     }
 
@@ -282,10 +306,23 @@ export class Dragster implements IDrake {
 
     protected setupEvents(): void {
         // Subscribe to mousedown events to trigger Dragon
-        let mouseDownEvents: Observable<Event>[] = getEventNames('mousedown').map((eventName: string) => Observable.fromEvent(document.documentElement, eventName));
+        let mouseDownEvents$: Observable<MouseEvent>[] = [];
 
-        Observable.merge(...mouseDownEvents).subscribe(
-            (mouseDownEvent: MouseEvent) => this.grab(mouseDownEvent)
+        // Subscribe on all associated containers
+        // todo: re-subscribe when changing this.containers
+        this.containers.forEach(container => {
+            mouseDownEvents$ = mouseDownEvents$.concat(getEventNames('mousedown').map((eventName: string) => Observable.fromEvent(container, eventName)));
+        });
+
+        // todo: save subscription
+        Observable.merge(...mouseDownEvents$).subscribe(
+            (mouseDownEvent: MouseEvent) => {
+                if (this.draggedElement != null && this.dragging) {
+                    // Cancel existing drag session if new mousedown event happens
+                    this.draggedElement.cancel();
+                }
+                this.grab(mouseDownEvent);
+            }
         );
     }
 }

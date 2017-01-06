@@ -1,4 +1,4 @@
-import {DrakeDirection} from '../interfaces/dragster-options';
+import {drakeDirection} from '../interfaces/dragster-options';
 
 /**
  * Returns the parent element of a given element or null when hitting the root node
@@ -18,13 +18,13 @@ export function getParentElement(givenElement: HTMLElement): HTMLElement | null 
 export function getNextSibling(givenElement: HTMLElement): HTMLElement | null {
     if (givenElement == null) return null;
 
-    let nextElementSibling: HTMLElement | null = <HTMLElement>givenElement.nextElementSibling;
+    let nextElementSibling = <HTMLElement | null>givenElement.nextElementSibling;
     if (nextElementSibling != null) return nextElementSibling;
 
     // Detect Sibling manually
-    let sibling: Node | null = <Node>givenElement;
+    let sibling: HTMLElement | null = givenElement;
     do {
-        sibling = sibling.nextSibling;
+        sibling = <HTMLElement | null>sibling.nextSibling;
     } while (sibling != null && sibling.nodeType !== 1);
 
     return <HTMLElement>sibling;
@@ -43,7 +43,7 @@ export function getElementBehindPoint(x: number, y: number, flyingElement?: HTML
     if (flyingElement) flyingElement.style.display = 'none';
 
     // Capture element below
-    let element: HTMLElement = <HTMLElement>document.elementFromPoint(x, y);
+    let element = <HTMLElement>document.elementFromPoint(x, y);
 
     // Show element again
     if (flyingElement) flyingElement.style.display = null;
@@ -61,9 +61,9 @@ export function getImmediateChild(container: HTMLElement, childOfContainer: HTML
     // Cancel if childOfContainer is equal to container
     if (container === childOfContainer) return null;
 
-    let immediate: HTMLElement = childOfContainer;
+    let immediate = childOfContainer;
     while (immediate !== container && getParentElement(immediate) !== container) {
-        let parent: HTMLElement | null = getParentElement(immediate);
+        let parent = getParentElement(immediate);
         if (parent == null) break;
 
         immediate = parent;
@@ -83,16 +83,16 @@ export function getImmediateChild(container: HTMLElement, childOfContainer: HTML
  * @param direction
  * @returns {HTMLElement}
  */
-export function getElementForPosition(dropTarget: HTMLElement, target: HTMLElement, x: number, y: number, direction: DrakeDirection): HTMLElement | null {
-    let horizontal: boolean = direction === 'horizontal';
+export function getElementForPosition(dropTarget: HTMLElement, target: HTMLElement, x: number, y: number, direction: drakeDirection): HTMLElement | null {
+    let horizontal = direction === 'horizontal';
 
     // Choose method to determine child
     if (target !== dropTarget) {
         // Determine by dropTarget - slower but every position can be found
-        let children: HTMLCollection = dropTarget.children;
-        for (let i: number = 0; i < children.length; i++) {
-            let child: HTMLElement = <HTMLElement>children[i];
-            let rect: ClientRect = child.getBoundingClientRect();
+        let children = dropTarget.children;
+        for (let i = 0; i < children.length; i++) {
+            let child = <HTMLElement>children[i];
+            let rect = child.getBoundingClientRect();
 
             // Horizontal detection
             if (horizontal && (rect.left + rect.width / 2) > x) return child;
@@ -105,14 +105,14 @@ export function getElementForPosition(dropTarget: HTMLElement, target: HTMLEleme
     }
     else {
         // Determine by target - faster but only available inside a child element
-        let rect: ClientRect = target.getBoundingClientRect();
+        let rect = target.getBoundingClientRect();
         if (horizontal) return (x > rect.left + rect.width / 2) ? getNextSibling(target) : target;
         else return (y > rect.top + rect.height / 2) ? getNextSibling(target) : target;
     }
 }
 
 export function isInput(givenElement: HTMLElement): boolean {
-    let nativeInputElement: boolean = (givenElement instanceof HTMLInputElement || givenElement instanceof HTMLTextAreaElement || givenElement instanceof HTMLSelectElement);
+    let nativeInputElement = (givenElement instanceof HTMLInputElement || givenElement instanceof HTMLTextAreaElement || givenElement instanceof HTMLSelectElement);
     if (nativeInputElement) return true;
 
     // Check if givenElement or one of its parent has contentEditable

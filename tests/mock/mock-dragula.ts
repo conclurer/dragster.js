@@ -16,7 +16,7 @@ export function mockDragula(optionsOrNodes?: (HTMLElement[]|IDragsterOptions), o
  * @param options
  */
 export function mockDragula(initialNodes: HTMLElement[], options?: IDragsterOptions): MockDragster {
-    let numArgs: number = arguments.length;
+    let numArgs = arguments.length;
     if (numArgs === 1 && Array.isArray(initialNodes) === false) {
         // Only options is given, reset arguments
         // tslint:disable-next-line

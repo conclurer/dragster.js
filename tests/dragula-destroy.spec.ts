@@ -1,11 +1,10 @@
 import test = require('tape');
 import Test = test.Test;
 import {mockDragula} from './mock/mock-dragula';
-import {MockDragster} from './mock/mock-dragster';
 
 test('destroy does not throw when not dragging, destroyed, or whatever', (t: Test) => {
     t.test('a single time', (st: Test) => {
-        let drake: MockDragster = mockDragula();
+        let drake = mockDragula();
         st.doesNotThrow(
             () => drake.destroy(),
             'dragula bites into a single call to drake.destroy'
@@ -13,7 +12,7 @@ test('destroy does not throw when not dragging, destroyed, or whatever', (t: Tes
         st.end();
     });
     t.test('multiple times', (st: Test) => {
-        let drake: MockDragster = mockDragula();
+        let drake = mockDragula();
         st.doesNotThrow(
             () => {
                 drake.destroy();
@@ -29,9 +28,9 @@ test('destroy does not throw when not dragging, destroyed, or whatever', (t: Tes
 });
 
 test('when dragging and destroy gets called, nothing happens', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div]);
+    let div = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div]);
     div.appendChild(item);
     document.body.appendChild(div);
     drake.start(item);
@@ -42,9 +41,9 @@ test('when dragging and destroy gets called, nothing happens', (t: Test) => {
 });
 
 test('when dragging and destroy gets called, dragend event is emitted gracefully', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div]);
+    let div = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div]);
     div.appendChild(item);
     document.body.appendChild(div);
     drake.on('dragend', () => t.pass('dragend got called'));
@@ -55,10 +54,10 @@ test('when dragging and destroy gets called, dragend event is emitted gracefully
 });
 
 test('when dragging a copy and destroy gets called, default does not revert', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let div2: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div, div2]);
+    let div = document.createElement('div');
+    let div2 = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div, div2]);
     div.appendChild(item);
     document.body.appendChild(div);
     document.body.appendChild(div2);
@@ -80,10 +79,10 @@ test('when dragging a copy and destroy gets called, default does not revert', (t
 });
 
 test('when dragging a copy and destroy gets called, revert is executed', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let div2: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div, div2], {revertOnSpill: true});
+    let div = document.createElement('div');
+    let div2 = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div, div2], {revertOnSpill: true});
     div.appendChild(item);
     document.body.appendChild(div);
     document.body.appendChild(div2);

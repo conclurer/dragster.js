@@ -1,10 +1,9 @@
 import test = require('tape');
 import Test = test.Test;
 import {mockDragula} from './mock/mock-dragula';
-import {MockDragster} from './mock/mock-dragster';
 
 test('drake has sensible default options', (t: Test) => {
-    let dragster: MockDragster = mockDragula();
+    let dragster = mockDragula();
     t.equal(typeof dragster.options.moves, 'function', 'options.moves defaults to a method');
     t.equal(typeof dragster.options.accepts, 'function', 'options.accepts defaults to a method');
     t.equal(typeof dragster.options.invalid, 'function', 'options.invalid defaults to a method');

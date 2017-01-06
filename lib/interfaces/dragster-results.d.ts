@@ -27,50 +27,54 @@ export interface IDragonDropZone {
     nextSibling: HTMLElement | null;
 }
 
-export type shadowElementProvider = (elementInMotion: HTMLElement, shadowContainer: HTMLElement) => HTMLElement;
+export interface ShadowElementProviderSignature {
+    (elementInMotion: HTMLElement, shadowContainer: HTMLElement): HTMLElement;
+}
 
 export type mouseEventName = 'mouseup' | 'mousedown' | 'mousemove';
 
 // Clone Event
-export type DragsterCloneType = 'copy' | 'mirror';
-export type DragsterClonedEventHandler = (clonedElement?: HTMLElement,
-                                          originalElement?: HTMLElement,
-                                          cloneType?: DragsterCloneType) => void;
+export type dragsterCloneType = 'copy' | 'mirror';
+export interface DragsterClonedEventHandlerSignature {
+    (clonedElement: HTMLElement, originalElement: HTMLElement, cloneType: dragsterCloneType): void;
+}
 
 // Drag Event
-export type DragsterDragEventHandler = (draggedElement?: HTMLElement,
-                                        sourceContainer?: HTMLElement) => void;
+export interface DragsterDragEventHandlerSignature {
+    (draggedElement: HTMLElement, sourceContainer: HTMLElement): void;
+}
 
 // Dragend Event
-export type DragsterDragEndEventHandler = (draggedElement?: HTMLElement) => void;
+export interface DragsterDragEndEventHandlerSignature {
+    (draggedElement: HTMLElement): void;
+}
 
 // Cancel Event
-export type DragsterCancelEventHandler = (draggedElement?: HTMLElement,
-                                          currentContainer?: HTMLElement,
-                                          sourceContainer?: HTMLElement) => void;
+export interface DragsterCancelEventHandlerSignature {
+    (draggedElement: HTMLElement, currentContainer: HTMLElement, sourceContainer: HTMLElement): void;
+}
 
 // Drop Event
-export type DragsterDropEventHandler = (droppedElement?: HTMLElement,
-                                        dropTargetContainer?: HTMLElement,
-                                        sourceContainer?: HTMLElement,
-                                        beforeSibling?: HTMLElement) => void;
+export interface DragsterDropEventHandlerSignature {
+    (droppedElement: HTMLElement, dropTargetContainer: HTMLElement, sourceContainer: HTMLElement, beforeSibling: HTMLElement): void;
+}
 
 // Out Event
-export type DragsterOutEventHandler = (movedElement?: HTMLElement,
-                                       containerElementWasOver?: HTMLElement,
-                                       sourceContainer?: HTMLElement) => void;
+export interface DragsterOutEventHandlerSignature {
+    (movedElement: HTMLElement, containerElementWasOver: HTMLElement, sourceContainer: HTMLElement): void;
+}
 
 // Over Event
-export type DragsterOverEventHandler = (movedElement?: HTMLElement,
-                                        containerElementIsOver?: HTMLElement,
-                                        sourceContainer?: HTMLElement) => void;
+export interface DragsterOverEventHandlerSignature {
+    (movedElement: HTMLElement, containerElementIsOver: HTMLElement, sourceContainer: HTMLElement): void;
+}
 
 // Shadow Event
-export type DragsterShadowEventHandler = (shadowElement?: HTMLElement,
-                                          containerShadowIsIn?: HTMLElement,
-                                          sourceContainer?: HTMLElement) => void;
+export interface DragsterShadowEventHandlerSignature {
+    (shadowElement: HTMLElement, containerShadowIsIn: HTMLElement, sourceContainer: HTMLElement): void;
+}
 
 // Remove Event
-export type DragsterRemoveEventHandler = (removedElement?: HTMLElement,
-                                          lastContainer?: HTMLElement,
-                                          sourceContainer?: HTMLElement) => void;
+export interface DragsterRemoveEventHandlerSignature {
+    (removedElement: HTMLElement, lastContainer: HTMLElement, sourceContainer: HTMLElement): void;
+}

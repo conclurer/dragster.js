@@ -18,7 +18,7 @@ export class DragonCloneElement extends DragonElement {
     }
 
     protected findDropTarget(elementFlownOver: HTMLElement, mouseX: number, mouseY: number): HTMLElement | null {
-        let target: HTMLElement | null = super.findDropTarget(elementFlownOver, mouseX, mouseY);
+        let target = super.findDropTarget(elementFlownOver, mouseX, mouseY);
 
         // DropTarget must not be source container
         return (target === this.originalContainer) ? null : target;

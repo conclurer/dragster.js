@@ -1,11 +1,10 @@
 import test = require('tape');
 import Test = test.Test;
 import {mockDragula} from './mock/mock-dragula';
-import {MockDragster} from './mock/mock-dragster';
 
 test('cancel does not throw when not dragging', (t: Test) => {
     t.test('a single time', (st: Test) => {
-        let drake: MockDragster = mockDragula();
+        let drake = mockDragula();
         st.doesNotThrow(
             () => {
                 drake.cancel();
@@ -15,7 +14,7 @@ test('cancel does not throw when not dragging', (t: Test) => {
         st.end();
     });
     t.test('multiple times', (st: Test) => {
-        let drake: MockDragster = mockDragula();
+        let drake = mockDragula();
         st.doesNotThrow(
             () => {
                 drake.cancel();
@@ -31,9 +30,9 @@ test('cancel does not throw when not dragging', (t: Test) => {
 });
 
 test('when dragging and cancel gets called, nothing happens', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div]);
+    let div = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div]);
     div.appendChild(item);
     document.body.appendChild(div);
     drake.start(item);
@@ -44,9 +43,9 @@ test('when dragging and cancel gets called, nothing happens', (t: Test) => {
 });
 
 test('when dragging and cancel gets called, cancel event is emitted', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div]);
+    let div = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div]);
     div.appendChild(item);
     document.body.appendChild(div);
 
@@ -67,10 +66,10 @@ test('when dragging and cancel gets called, cancel event is emitted', (t: Test) 
 });
 
 test('when dragging a copy and cancel gets called, default does not revert', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let div2: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div, div2]);
+    let div = document.createElement('div');
+    let div2 = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div, div2]);
     div.appendChild(item);
     document.body.appendChild(div);
     document.body.appendChild(div2);
@@ -94,10 +93,10 @@ test('when dragging a copy and cancel gets called, default does not revert', (t:
 });
 
 test('when dragging a copy and cancel gets called, revert is executed', (t: Test) => {
-    let div: HTMLElement = document.createElement('div');
-    let div2: HTMLElement = document.createElement('div');
-    let item: HTMLElement = document.createElement('div');
-    let drake: MockDragster = mockDragula([div, div2]);
+    let div = document.createElement('div');
+    let div2 = document.createElement('div');
+    let item = document.createElement('div');
+    let drake = mockDragula([div, div2]);
     div.appendChild(item);
     document.body.appendChild(div);
     document.body.appendChild(div2);

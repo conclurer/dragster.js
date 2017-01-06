@@ -22,7 +22,7 @@ export class MockDragster extends Dragster {
         this.draggedElement.setOrigin(context.source, getNextSibling(context.item));
 
         // Subscribe to Dragon events
-        this.draggedElementEventSubscription = this.draggedElement.events().subscribe((dragsterEvent: IDragsterEvent) => {
+        this.draggedElementEventSubscription = this.draggedElement.events$.subscribe((dragsterEvent: IDragsterEvent) => {
             switch (dragsterEvent.channel) {
                 // Drag Event
                 case 'drag':
@@ -41,7 +41,7 @@ export class MockDragster extends Dragster {
                     break;
 
                 case 'dragend':
-                    /** {@link DragsterDragEndEventHandler} */
+                    /** {@link DragsterDragEndEventHandlerSignature} */
                     this.emitter.next({channel: dragsterEvent.channel, data: dragsterEvent.data});
 
                     // Cleanup this

@@ -89,6 +89,8 @@ export class DragonElement {
         if (sibling) sib = sibling;
         else sib = this.originalSibling;
 
+        console.log('container', container);
+        console.log('initialPlacement', container === this.originalContainer, sib === this.originalSibling);
         return container === this.originalContainer && sib === this.originalSibling;
     }
 
@@ -139,7 +141,7 @@ export class DragonElement {
      * Returns a stream of all events triggered by this.
      * @returns {Observable<IDragsterEvent>}
      */
-    public events(): Observable<IDragsterEvent> {
+    public get events$(): Observable<IDragsterEvent> {
         return this.emitter.asObservable();
     }
 
@@ -147,18 +149,18 @@ export class DragonElement {
      * Sets up event streams to oversee the user's interactions and react to them.
      */
     protected setupStream(): void {
-        let moveEvents: Observable<Event>[] = getEventNames('mousemove').map((eventName: string) => {
+        let moveEvents$ = getEventNames('mousemove').map((eventName: string) => {
             return Observable.fromEvent(document.documentElement, eventName);
         });
 
-        let upEvents: Observable<Event>[] = getEventNames('mouseup').map((eventName: string) => {
+        let upEvents$ = getEventNames('mouseup').map((eventName: string) => {
             return Observable.fromEvent(document.documentElement, eventName);
         });
 
         // Subscribe to user's mouse move events
-        this.itemMoveStream = Observable.merge(...moveEvents)
+        this.itemMoveStream = Observable.merge(...moveEvents$)
         // Cancel when the user stops to
-            .takeUntil(Observable.merge(...upEvents))
+            .takeUntil(Observable.merge(...upEvents$))
             .subscribe(
                 // Executed whenever the user moves this.item
                 (itemMovedEvent: MouseEvent) => {
@@ -181,7 +183,7 @@ export class DragonElement {
                     // Text selection inside an Input-like HTMLElement
                     // If Dragster is configured to ignoreInputTextSelection, cancel event
                     if (this.options.ignoreInputTextSelection && !this.isDragging()) {
-                        let elementBehindCursor: HTMLElement = <HTMLElement>document.elementFromPoint(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
+                        let elementBehindCursor = <HTMLElement>document.elementFromPoint(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                         if (isInput(elementBehindCursor)) {
                             this.release(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                             return;
@@ -204,12 +206,12 @@ export class DragonElement {
 
                     // Detect and apply coordinate changes
                     // elementInner: Coordinates of the element including offset of curser to element borders
-                    let elementInnerX: number = this.itemOriginalCoordinates.x + (this.mouseCoordinatesOnStart.x - this.itemOriginalCoordinates.x);
-                    let elementInnerY: number = this.itemOriginalCoordinates.y + (this.mouseCoordinatesOnStart.y - this.itemOriginalCoordinates.y);
+                    let elementInnerX = this.itemOriginalCoordinates.x + (this.mouseCoordinatesOnStart.x - this.itemOriginalCoordinates.x);
+                    let elementInnerY = this.itemOriginalCoordinates.y + (this.mouseCoordinatesOnStart.y - this.itemOriginalCoordinates.y);
 
                     // Calculate total x/y position
-                    let x: number = this.currentMouseCoordinates.x - elementInnerX;
-                    let y: number = this.currentMouseCoordinates.y - elementInnerY;
+                    let x = this.currentMouseCoordinates.x - elementInnerX;
+                    let y = this.currentMouseCoordinates.y - elementInnerY;
 
                     // Cancel if there is no flying item
                     if (this.flyingItem == null) return;
@@ -239,25 +241,32 @@ export class DragonElement {
         // Send out start event
         this.emitter.next({
             channel: 'drag',
-            /** {@link DragsterDragEventHandler} */
+            /** {@link DragsterDragEventHandlerSignature} */
             data: [this.item, this.originalContainer]
         });
 
         // Get offset coordinates for this.item
-        let rect: ClientRect = this.item.getBoundingClientRect();
+        let rect = this.item.getBoundingClientRect();
         this.itemOriginalCoordinates = {
             x: rect.left + window.pageXOffset,
             y: rect.top + window.pageYOffset
         };
 
-        // todo apply class (.gu-transit) to dragged element (+ hook)
+        // todo add hook for local item
+        this.item.setAttribute('data-dragster-transit', '');
 
         this.flyingItem = this.options.flyingElementProvider(this.elementToFly());
+
+        // Append to target mirror conatiner
+        this.options.mirrorContainer.appendChild(this.flyingItem);
+
+        // Add data-dragster-flying to flying element
+        // this.flyingItem.setAttribute('data-dragster-flying', '');
 
         // Send out cloned event
         this.emitter.next({
             channel: 'cloned',
-            /** {@link DragsterClonedEventHandler} */
+            /** {@link DragsterClonedEventHandlerSignature} */
             data: [this.flyingItem, this.item, 'mirror']
         });
 
@@ -273,8 +282,8 @@ export class DragonElement {
         // Cancel if there is no flyingItem
         if (this.flyingItem == null) return;
 
-        let overElement: HTMLElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
-        let dropZoneContainer: HTMLElement | null = this.findDropTarget(overElement, mouseX, mouseY);
+        let overElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
+        let dropZoneContainer = this.findDropTarget(overElement, mouseX, mouseY);
         let dropZone: IDragonDropZone | null = null;
 
         // Find default drop zone configuration (for dropZone)
@@ -286,7 +295,7 @@ export class DragonElement {
         if (dropZone == null) dropZone = this.detectRevertableDropZone();
 
         // Determine whether the drop target did change
-        let dropTargetDidChange: boolean = (dropZone != null && dropZone.container !== this.lastDropTarget);
+        let dropTargetDidChange = (dropZone != null && dropZone.container !== this.lastDropTarget);
 
         // Re-assign lastDropZone and trigger events
         if (dropTargetDidChange || dropZone == null) {
@@ -302,7 +311,7 @@ export class DragonElement {
         if (this.lastDropTarget != null) {
             this.emitter.next({
                 channel: 'out',
-                /** {@link DragsterOutEventHandler} */
+                /** {@link DragsterOutEventHandlerSignature} */
                 data: [this.item, this.lastDropTarget, this.originalContainer]
             });
         }
@@ -313,7 +322,7 @@ export class DragonElement {
         if (this.lastDropTarget != null) {
             this.emitter.next({
                 channel: 'over',
-                /** {@link DragsterOverEventHandler} */
+                /** {@link DragsterOverEventHandlerSignature} */
                 data: [this.item, this.lastDropTarget, this.originalContainer]
             });
         }
@@ -330,8 +339,8 @@ export class DragonElement {
         }
 
         // Check conditions for adding shadow to dropZone
-        let dropZoneDidChangeAndHasNoSibling: boolean = (dropZone.nextSibling == null && dropTargetDidChange);
-        let dropZoneSiblingIsNotShadow: boolean = (dropZone.nextSibling !== this.shadowItem);
+        let dropZoneDidChangeAndHasNoSibling = (dropZone.nextSibling == null && dropTargetDidChange);
+        let dropZoneSiblingIsNotShadow = (dropZone.nextSibling !== this.shadowItem);
         let dropZoneShadowIsNotAlreadyAtPosition: boolean;
         if (this.shadowItem == null) {
             dropZoneShadowIsNotAlreadyAtPosition = (dropZone.nextSibling != null);
@@ -359,7 +368,7 @@ export class DragonElement {
             // Emit shadow event
             this.emitter.next({
                 channel: 'shadow',
-                /** {@link DragsterShadowEventHandler} */
+                /** {@link DragsterShadowEventHandlerSignature} */
                 data: [this.shadowItem, dropZone.container, this.originalContainer]
             });
         }
@@ -378,11 +387,11 @@ export class DragonElement {
         if (this.options.direction == null) return null;
 
         // Find child in Drop Zone
-        let immediate: HTMLElement | null = getImmediateChild(detectedDropZone, elementWithin);
+        let immediate = getImmediateChild(detectedDropZone, elementWithin);
 
         if (immediate != null) {
             // If there is a child right below the element dragged, find position to add
-            let reference: HTMLElement | null = getElementForPosition(detectedDropZone, immediate, mouseX, mouseY, this.options.direction);
+            let reference = getElementForPosition(detectedDropZone, immediate, mouseX, mouseY, this.options.direction);
 
             // Return dropZone
             return {container: detectedDropZone, nextSibling: reference};
@@ -420,8 +429,8 @@ export class DragonElement {
         if (this.flyingItem == null) return;
 
         // Detect drop zone
-        let overElement: HTMLElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
-        let dropZone: HTMLElement | null = this.findDropTarget(overElement, mouseX, mouseY);
+        let overElement = getElementBehindPoint(mouseX, mouseY, this.flyingItem);
+        let dropZone = this.findDropTarget(overElement, mouseX, mouseY);
 
         if (dropZone != null) {
             this.drop(this.item, dropZone);
@@ -439,7 +448,7 @@ export class DragonElement {
         this.cancelled = true;
 
         // Unsubscribe stream
-        if (!this.itemMoveStream.isUnsubscribed) this.itemMoveStream.unsubscribe();
+        this.itemMoveStream.unsubscribe();
     }
 
     /**
@@ -455,7 +464,7 @@ export class DragonElement {
         if (this.isInInitialPlacement(target, this.currentSibling)) {
             this.emitter.next({
                 channel: 'cancel',
-                /** {@link DragsterCancelEventHandler} */
+                /** {@link DragsterCancelEventHandlerSignature} */
                 data: [item, target, this.originalContainer]
             });
         }
@@ -463,7 +472,7 @@ export class DragonElement {
             // Emit drop event
             this.emitter.next({
                 channel: 'drop',
-                /** {@link DragsterDropEventHandler} */
+                /** {@link DragsterDropEventHandlerSignature} */
                 data: [item, target, this.originalContainer, this.currentSibling]
             });
         }
@@ -476,13 +485,13 @@ export class DragonElement {
         if (!this.isDragging()) return;
 
         // Remove this.item
-        let parent: HTMLElement | null = <HTMLElement>this.item.parentNode;
+        let parent = <HTMLElement>this.item.parentNode;
         if (parent != null) parent.removeChild(this.item);
 
         // Emit remove event
         this.emitter.next({
             channel: 'remove',
-            /** {@link DragsterRemoveEventHandler} */
+            /** {@link DragsterRemoveEventHandlerSignature} */
             data: [this.item, parent, this.originalContainer]
         });
 
@@ -497,10 +506,13 @@ export class DragonElement {
         // Cancel if not dragging
         if (!this.isDragging()) return;
 
-        let reverts: boolean = false; // todo use revert on spill
+        let reverts = false; // todo use revert on spill
         if (revert) reverts = true;
 
-        let isInInitialPosition: boolean = this.isInInitialPlacement(this.lastDropTarget, this.currentSibling);
+        // If cancelled before having detected the first drop target, the original container is treated as the last drop target
+        let lastDropTarget = this.lastDropTarget || this.originalContainer;
+
+        let isInInitialPosition = this.isInInitialPlacement(lastDropTarget, this.currentSibling);
         if (!isInInitialPosition && reverts) {
             this.originalContainer.insertBefore(this.item, this.originalSibling);
         }
@@ -509,7 +521,7 @@ export class DragonElement {
             // Emit cancel event
             this.emitter.next({
                 channel: 'cancel',
-                /** {@link DragsterCancelEventHandler} */
+                /** {@link DragsterCancelEventHandlerSignature} */
                 data: [this.item, this.originalContainer, this.originalContainer]
             });
         }
@@ -517,8 +529,8 @@ export class DragonElement {
             // Emit drop event
             this.emitter.next({
                 channel: 'drop',
-                /** {@link DragsterDropEventHandler} */
-                data: [this.item, this.lastDropTarget, this.originalContainer, this.currentSibling]
+                /** {@link DragsterDropEventHandlerSignature} */
+                data: [this.item, lastDropTarget, this.originalContainer, this.currentSibling]
             });
         }
 
@@ -529,6 +541,16 @@ export class DragonElement {
      * Performs a cleanup of this, removing the flying element.
      */
     protected cleanup(): void {
+        // Emit dragend event
+        this.emitter.next({
+            channel: 'dragend',
+            /** {@link DragsterDragEndEventHandlerSignature} */
+            data: [this.item]
+        });
+
+        // Remove data-dragster-transit attribute todo: add hook
+        this.item.removeAttribute('data-dragster-transit');
+
         // Cancel if there is no flyingElement
         if (this.flyingItem == null) return;
 
@@ -539,17 +561,10 @@ export class DragonElement {
         if (this.lastDropTarget != null) {
             this.emitter.next({
                 channel: 'out',
-                /** {@link DragsterOutEventHandler} */
+                /** {@link DragsterOutEventHandlerSignature} */
                 data: [this.item, this.lastDropTarget, this.originalContainer]
             });
         }
-
-        // Emit dragend event
-        this.emitter.next({
-            channel: 'dragend',
-            /** {@link DragsterDragEndEventHandler} */
-            data: [this.item]
-        });
 
         // Complete event stream
         this.emitter.complete();
@@ -573,7 +588,7 @@ export class DragonElement {
             }
 
             // Detect immediate child element of target, cancel if it does not exist
-            let immediate: HTMLElement | null = getImmediateChild(target, elementFlownOver);
+            let immediate = getImmediateChild(target, elementFlownOver);
 
             if (immediate == null) {
                 // There is no child container right below the element dragged ~> add as last element
@@ -586,7 +601,7 @@ export class DragonElement {
             }
             else {
                 // Child element below has been found
-                let elementAtPosition: HTMLElement | null = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
+                let elementAtPosition = getElementForPosition(target, immediate, mouseX, mouseY, this.options.direction);
 
                 // An element should always be allowed to drop back to its origin
                 if (this.isInInitialPlacement(target, elementAtPosition)) break;

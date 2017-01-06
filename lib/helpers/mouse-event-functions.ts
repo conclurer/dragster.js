@@ -9,7 +9,7 @@ export function whichMouseButton(e: MouseEvent | TouchEvent): number {
 
         if (e.which !== void 0 && e.which !== 0) return e.which; // see https://github.com/bevacqua/dragula/issues/261
         if (e.buttons !== void 0) return e.buttons;
-        let button: number = e.button;
+        let button = e.button;
         if (button !== void 0) { // see https://github.com/jquery/jquery/blob/99e8ff1baa7ae341e94bb89c3e84570c7c3ad9ea/src/event.js#L573-L575
 
             // Disable tslint for bitwise operators
