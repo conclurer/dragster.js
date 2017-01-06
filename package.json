@@ -3,8 +3,16 @@
   "version": "1.0.0",
   "description": "Drag and drop framework based on Dragula, rewritten in Typescript",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "dist/*.js",
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
   "scripts": {
     "build:static": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js && webpack ./build/dragster-static.js ./dist/dragster.min.js --optimize-minimize",
+    "prepublish": "npm run test && npm run tsc && npm run build:static",
     "watch": "tsc && webpack ./build/dragster-static.js ./dist/dragster.js --watch",
     "test": "tsc && browserify tests/*.spec.js | tape-run",
     "lint": "tslint **/*.ts !**/*.d.ts"

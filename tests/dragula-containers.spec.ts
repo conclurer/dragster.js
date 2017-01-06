@@ -5,7 +5,6 @@ import {mockDragula} from './mock/mock-dragula';
 test('drake defaults to no containers', (t: Test) => {
     let drake = mockDragula();
     t.ok(Array.isArray(drake.containers), 'drake.containers is an array');
-    console.log(drake.containers);
     t.equal(drake.containers.length, 0, 'drake.containers is empty');
     t.end();
 });

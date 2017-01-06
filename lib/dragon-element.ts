@@ -89,8 +89,6 @@ export class DragonElement {
         if (sibling) sib = sibling;
         else sib = this.originalSibling;
 
-        console.log('container', container);
-        console.log('initialPlacement', container === this.originalContainer, sib === this.originalSibling);
         return container === this.originalContainer && sib === this.originalSibling;
     }
 
@@ -222,7 +220,8 @@ export class DragonElement {
                     // Detect DropZones below
                     this.detectDropZone(itemMovedEvent.clientX, itemMovedEvent.clientY);
                 },
-                (error) => console.log(error),
+                // tslint:disable-next-line
+                (error) => console.error(error),
 
                 // Executed when the user stops to drag one element
                 () => {
