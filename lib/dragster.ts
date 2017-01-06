@@ -169,8 +169,9 @@ export class Dragster implements IDrake {
     }
 
     public remove(): void {
-        return;
-        // todo
+        if (!this.dragging || this.draggedElement == null) return;
+
+        this.draggedElement.remove();
     }
 
     public on(events: 'drag', callback: DragsterDragEventHandlerSignature): Dragster;

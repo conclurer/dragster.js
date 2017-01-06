@@ -23,4 +23,27 @@ export class DragonCloneElement extends DragonElement {
         // DropTarget must not be source container
         return (target === this.originalContainer) ? null : target;
     }
+
+    protected emitClonedEvent(): void {
+        this.emitter.next({
+            channel: 'cloned',
+            /** {@link DragsterClonedEventHandlerSignature} */
+            data: [this.flyingItem, this.originalItem, 'copy']
+        });
+    }
+
+    public remove(): void {
+        // Cancel if not dragging
+        if (!this.isDragging()) return;
+
+        // Emit cancel event
+        this.emitter.next({
+            channel: 'cancel',
+            /** {@link DragsterCancelEventHandlerSignature} */
+            data: [this.item, null, this.originalContainer]
+        });
+
+        // Perform cleanup
+        this.cleanup();
+    }
 }

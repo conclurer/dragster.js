@@ -264,13 +264,20 @@ export class DragonElement {
         // this.flyingItem.setAttribute('data-dragster-flying', '');
 
         // Send out cloned event
+        this.emitClonedEvent();
+
+        this.dragging = true;
+    }
+
+    /**
+     * Emits a cloned event for the recently created flyingElement. Intendet to be overwritten by sub classes.
+     */
+    protected emitClonedEvent(): void {
         this.emitter.next({
             channel: 'cloned',
             /** {@link DragsterClonedEventHandlerSignature} */
             data: [this.flyingItem, this.item, 'mirror']
         });
-
-        this.dragging = true;
     }
 
     /**
@@ -480,7 +487,7 @@ export class DragonElement {
         this.cleanup();
     }
 
-    protected remove(): void {
+    public remove(): void {
         // Cancel if not dragging
         if (!this.isDragging()) return;
 
@@ -506,7 +513,7 @@ export class DragonElement {
         // Cancel if not dragging
         if (!this.isDragging()) return;
 
-        let reverts = false; // todo use revert on spill
+        let reverts = this.options.revertOnSpill;
         if (revert) reverts = true;
 
         // If cancelled before having detected the first drop target, the original container is treated as the last drop target

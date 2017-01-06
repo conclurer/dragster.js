@@ -141,7 +141,7 @@ test('when copying, emits cloned with the copy', t => {
     containerElement.appendChild(item);
     document.body.appendChild(containerElement);
 
-    drake.on('cloned', (copy, i) => {
+    drake.on('cloned', (copy, i, type) => {
         t.notEqual(copy, item, 'first argument is not exactly the target');
         t.equal(copy.tagName, item.tagName, 'first argument has same tag as target');
         t.equal(copy.innerHTML, item.innerHTML, 'first argument has same inner html as target');

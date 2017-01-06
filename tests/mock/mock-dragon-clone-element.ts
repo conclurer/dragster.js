@@ -1,7 +1,8 @@
-import {DragonElement} from '../../lib/dragon-element';
 import {IDragonDropZone} from '../../lib/interfaces/dragster-results';
+import {DragonCloneElement} from '../../lib/dragon-clone-element';
+import {MockDragonElement} from './mock-dragon-element';
 
-export class MockDragonElement extends DragonElement {
+export class MockDragonCloneElement extends DragonCloneElement {
     protected setupStream(): void {
         this.initializeDrag();
         this.mockDetectDropZone(this.originalContainer, this.originalSibling);
@@ -55,7 +56,7 @@ export class MockDragonElement extends DragonElement {
         this.moveShadow(dropZone, dropTargetDidChange);
     }
 
-    public static mockDetectCurrentDropZonePosition(detectedDropZone: HTMLElement, sibling: HTMLElement | null): IDragonDropZone {
+    protected static mockDetectCurrentDropZonePosition(detectedDropZone: HTMLElement, sibling: HTMLElement | null): IDragonDropZone {
         return {container: detectedDropZone, nextSibling: sibling};
     }
 }

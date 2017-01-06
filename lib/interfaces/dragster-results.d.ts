@@ -51,7 +51,7 @@ export interface DragsterDragEndEventHandlerSignature {
 
 // Cancel Event
 export interface DragsterCancelEventHandlerSignature {
-    (draggedElement: HTMLElement, currentContainer: HTMLElement, sourceContainer: HTMLElement): void;
+    (draggedElement: HTMLElement, currentContainer: HTMLElement | null, sourceContainer: HTMLElement): void;
 }
 
 // Drop Event
