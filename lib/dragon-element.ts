@@ -42,8 +42,9 @@ export class DragonElement {
     protected itemMoveStream: Subscription;
     protected mouseCoordinatesOnStart: IDragonItemCoordinates | null;
     protected currentMouseCoordinates: IDragonItemCoordinates | null;
-    protected lastDropTarget: HTMLElement | null = null;
+    protected currentDropTarget: HTMLElement | null = null;
     protected currentSibling: HTMLElement | null;
+    protected latestDropZone: IDragonDropZone | null = null;
 
     // Event Emitter
     protected emitter: Subject<IDragsterEvent> = new Subject<IDragsterEvent>();
@@ -305,7 +306,7 @@ export class DragonElement {
         if (dropZone == null) dropZone = this.detectRevertableDropZone();
 
         // Determine whether the drop target did change
-        let dropTargetDidChange = (dropZone != null && dropZone.container !== this.lastDropTarget);
+        let dropTargetDidChange = (dropZone != null && dropZone.container !== this.currentDropTarget);
 
         // Re-assign lastDropZone and trigger events
         if (dropTargetDidChange || dropZone == null) {
@@ -318,23 +319,25 @@ export class DragonElement {
 
     protected changeLastDropZone(dropZone: IDragonDropZone | null): void {
         // Emit out event
-        if (this.lastDropTarget != null) {
+        if (this.currentDropTarget != null) {
             this.emitter.next({
                 channel: 'out',
                 /** {@link DragsterOutEventHandlerSignature} */
-                data: [this.item, this.lastDropTarget, this.originalContainer]
+                data: [this.item, this.currentDropTarget, this.originalContainer]
             });
         }
 
-        this.lastDropTarget = dropZone == null ? null : dropZone.container;
+        this.currentDropTarget = dropZone == null ? null : dropZone.container;
 
         // Emit over event
-        if (this.lastDropTarget != null) {
+        if (this.currentDropTarget != null) {
             this.emitter.next({
                 channel: 'over',
                 /** {@link DragsterOverEventHandlerSignature} */
-                data: [this.item, this.lastDropTarget, this.originalContainer]
+                data: [this.item, this.currentDropTarget, this.originalContainer]
             });
+
+            this.latestDropZone = dropZone;
         }
     }
 
@@ -472,6 +475,7 @@ export class DragonElement {
 
         // If dropped at initial position, emit cancel event instead of drop event
         if (this.isInInitialPlacement(target, this.currentSibling)) {
+            console.log('a');;;;;;;;;;;
             this.emitter.next({
                 channel: 'cancel',
                 /** {@link DragsterCancelEventHandlerSignature} */
@@ -520,28 +524,62 @@ export class DragonElement {
         if (revert) reverts = true;
 
         // If cancelled before having detected the first drop target, the original container is treated as the last drop target
-        let lastDropTarget = this.lastDropTarget || this.originalContainer;
 
-        let isInInitialPosition = this.isInInitialPlacement(lastDropTarget, this.currentSibling);
-        if (!isInInitialPosition && reverts) {
-            this.originalContainer.insertBefore(this.item, this.originalSibling);
-        }
+        let emitDrop = (container: HTMLElement, nextSibling: HTMLElement | null) => {
+            this.emitter.next({
+                channel: 'drop',
+                /** {@link DragsterDropEventHandlerSignature} */
+                data: [this.item, container, this.originalContainer, nextSibling]
+            });
+        };
 
-        if (isInInitialPosition || reverts) {
-            // Emit cancel event
+        let emitCancel = () => {
             this.emitter.next({
                 channel: 'cancel',
                 /** {@link DragsterCancelEventHandlerSignature} */
                 data: [this.item, this.originalContainer, this.originalContainer]
             });
+        };
+
+        // Detect behavior
+        if (this.currentDropTarget != null) {
+            if (reverts) {
+                // Revert to original drop target
+                this.originalContainer.insertBefore(this.item, this.originalSibling);
+                emitCancel();
+            }
+            else {
+                // Use the given current drop target
+                this.isInInitialPlacement(this.currentDropTarget, this.currentSibling) ? emitCancel() : emitDrop(this.currentDropTarget, this.currentSibling);
+            }
+        }
+        else if (this.currentDropTarget == null && reverts) {
+            // Revert to original drop target
+            this.originalContainer.insertBefore(this.item, this.originalSibling);
+            emitCancel();
+        }
+        else if (this.latestDropZone != null) {
+            let latestDropZone = this.latestDropZone;
+
+            // Cancel if related to itself
+            if (latestDropZone.nextSibling === this.item) {
+                this.originalContainer.insertBefore(this.item, this.originalSibling);
+                emitCancel();
+            }
+            else {
+                // Revert to latest drop target
+                latestDropZone.container.insertBefore(this.item, latestDropZone.nextSibling);
+                if (this.isInInitialPlacement(latestDropZone.container, latestDropZone.nextSibling)) {
+                    emitCancel();
+                }
+                else {
+                    emitDrop(latestDropZone.container, latestDropZone.nextSibling);
+                }
+            }
         }
         else {
-            // Emit drop event
-            this.emitter.next({
-                channel: 'drop',
-                /** {@link DragsterDropEventHandlerSignature} */
-                data: [this.item, lastDropTarget, this.originalContainer, this.currentSibling]
-            });
+            // Send cancel event
+            emitCancel();
         }
 
         this.cleanup();
@@ -567,11 +605,11 @@ export class DragonElement {
             this.flyingItem.parentNode.removeChild(this.flyingItem);
 
             // Emit out event for lastDropTarget
-            if (this.lastDropTarget != null) {
+            if (this.currentDropTarget != null) {
                 this.emitter.next({
                     channel: 'out',
                     /** {@link DragsterOutEventHandlerSignature} */
-                    data: [this.item, this.lastDropTarget, this.originalContainer]
+                    data: [this.item, this.currentDropTarget, this.originalContainer]
                 });
             }
         }

@@ -108,7 +108,7 @@ test('when dragging a copy and cancel gets called, revert is executed', (t: Test
     });
     drake.on('dragend', () => t.pass('dragend got called'));
 
-    // Peform actions
+    // Perform actions
     drake.start(item);
 
     // Move to div2

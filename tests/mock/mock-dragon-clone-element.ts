@@ -25,7 +25,7 @@ export class MockDragonCloneElement extends DragonCloneElement {
         if (this.flyingItem == null) return;
 
         // Detect drop zone (mocked to this.latestDropTarget)
-        let dropZone = this.lastDropTarget;
+        let dropZone = this.currentDropTarget;
 
         if (dropZone != null) {
             this.drop(this.item, dropZone);
@@ -45,7 +45,7 @@ export class MockDragonCloneElement extends DragonCloneElement {
 
     protected mockDetectDropZone(element: HTMLElement, sibling: HTMLElement | null): void {
         let dropZone = MockDragonElement.mockDetectCurrentDropZonePosition(element, sibling);
-        let dropTargetDidChange = (dropZone != null && dropZone.container !== this.lastDropTarget);
+        let dropTargetDidChange = (dropZone != null && dropZone.container !== this.currentDropTarget);
 
         // Re-assign lastDropZone and trigger events
         if (dropTargetDidChange || dropZone == null) {

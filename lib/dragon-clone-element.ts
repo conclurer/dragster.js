@@ -46,4 +46,18 @@ export class DragonCloneElement extends DragonElement {
         // Perform cleanup
         this.cleanup();
     }
+
+    public cancel(revert: boolean = false): void {
+        // Cancel if not dragging
+        if (!this.isDragging()) return;
+
+        // Cancelling a DragonCloneElement will always result in a cancel event
+        this.emitter.next({
+            channel: 'cancel',
+            /** {@link DragsterCancelEventHandlerSignature} */
+            data: [this.item, this.originalContainer, this.originalContainer]
+        });
+
+        this.cleanup();
+    }
 }
