@@ -223,15 +223,12 @@ export class DragonElement {
 
                 // Executed when the user stops to drag one element
                 () => {
-                    console.log('complete', this.currentMouseCoordinates);
                     // Cancel if there are no current mouse coordinates
                     if (this.currentMouseCoordinates == null) {
                         // Item has not been dragged anywhere, cleanup immediately
                         this.cleanup();
                         return;
                     }
-
-                    console.log('release');
 
                     this.release(this.currentMouseCoordinates.x, this.currentMouseCoordinates.y);
                 }
@@ -475,7 +472,6 @@ export class DragonElement {
 
         // If dropped at initial position, emit cancel event instead of drop event
         if (this.isInInitialPlacement(target, this.currentSibling)) {
-            console.log('a');;;;;;;;;;;
             this.emitter.next({
                 channel: 'cancel',
                 /** {@link DragsterCancelEventHandlerSignature} */
