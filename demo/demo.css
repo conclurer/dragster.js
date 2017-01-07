@@ -19,3 +19,23 @@
 .container.container--start {
     padding-top: 50px;
 }
+
+.handle {
+    background-color: #dae3e3;
+    display: inline-block;
+    color: #222;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    cursor: move;
+}
+
+.ex-moved .feature-inner {
+    background-color: #222;
+    border-top: 5px solid #6D6D6D;
+    color: #fff;
+}
+
+.ex-over {
+    background-color: #dae3e3;
+}

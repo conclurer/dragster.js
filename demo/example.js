@@ -6,16 +6,17 @@ dragula([$('left-defaults'), $('right-defaults')]);
 dragula([$('left-copy'), $('right-copy')], {copy: true});
 dragula([$('left-events'), $('right-events')])
     .on('drag', function (el) {
-        el.className = el.className.replace('ex-moved', '');
+        el.classList.remove('ex-moved');
     })
-    .on('drop', function (el) {
-        el.className += ' ex-moved';
+    .on('drop', function (el, container) {
+        el.classList.add('ex-moved');
+        container.classList.remove('ex-over');
     })
     .on('over', function (el, container) {
-        container.className += ' ex-over';
+        container.classList.add('ex-over');
     })
     .on('out', function (el, container) {
-        container.className = container.className.replace('ex-over', '');
+        container.classList.remove('ex-over');
     });
 dragula([$('left-rollbacks'), $('right-rollbacks')], {revertOnSpill: true});
 dragula([$('left-lovehandles'), $('right-lovehandles')], {
