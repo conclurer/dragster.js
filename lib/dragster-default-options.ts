@@ -9,22 +9,22 @@ import {dragsterDefaultShadowElementProvider} from './helpers/shadow-element-pro
 
 export class DragsterDefaultOptions implements IDragsterOptionsForced {
 
-    public moves(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, dragHandle?: HTMLElement, sibling?: HTMLElement): boolean {
+    public moves(): boolean {
         // All elements are draggable by default
         return true;
     }
 
-    public accepts(triggeringElement?: HTMLElement, sourceContainer?: HTMLElement, targetContainer?: HTMLElement, sibling?: HTMLElement): boolean {
+    public accepts(): boolean {
         // All elements can be dropped by default
         return true;
     }
 
-    public invalid(triggeringElement?: HTMLElement, handle?: HTMLElement): boolean {
+    public invalid(): boolean {
         // No element is prohibited from being dragged by default
         return false;
     }
 
-    public isContainer(container?: HTMLElement): boolean {
+    public isContainer(): boolean {
         // No other container beside the default specified containers is a valid container
         return false;
     }
