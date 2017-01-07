@@ -20,4 +20,4 @@ dist
 !dist/*.js
 
 # Example
-!demo/*
+!docs/*
