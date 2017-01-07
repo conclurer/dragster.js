@@ -148,3 +148,18 @@ Returns a RxJS observable that streams all of Dragster's events.
 
 ### `destroy(): void`
 Removes all drag and drop events used by Dragster to manage drag and drop between the containers. If `destroy()` is called while an element is being dragged, the drag will be effectively cancelled.
+
+## Replacing Dragula with Dragster
+
+To replace dragula with Dragster, just remove dragula's JS and CSS files and add `docs/dragster.min.js`. If you are using npm, add Dragster using: 
+
+`npm install --save dragster.js`
+
+Dragster will work out-of-the-box, since it interfaces dragula. Therefore, your existing `dragula()` calls will work as-is.
+
+```typescript
+import {dragula} from 'dragster.js';
+
+// drake will be instanceof Dragster
+let drake = dragula([document.getElementById('left'), document.getElementById('right')]);
+```
